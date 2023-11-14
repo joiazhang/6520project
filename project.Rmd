@@ -5,7 +5,7 @@ date: "Fall 2023"
 output: pdf_document
 ---
 
-
+# Simulate data for regression and classification
 ```{r}
 # simulate data: regression
 n = 100 # sample size
@@ -21,7 +21,7 @@ sum(which(beta !=0) != sort(nonzero_indexes)) # test that we made the right inde
 beta = as.matrix(beta)
 
 # x
-X = matrix(rnorm(n=n*p, mean=0, sd=1), nrow=n)
+X = matrix(rnorm(n=n*p, mean=10, sd=2), nrow=n)
 
 # epsilon
 E = matrix(rnorm(n=n, mean=0, sd=1), nrow=n)
@@ -30,7 +30,30 @@ E = matrix(rnorm(n=n, mean=0, sd=1), nrow=n)
 
 Y = X%*%beta + E
 
+# note that in the online setting, each t^th row of X and Y is for time t
+
 # simulate data: classification
+# X, beta same as above
+probs = 1/(1+exp(-X%*%beta))
+Y = rbinom(n=n, size=1, prob = probs) # Bernoulli
+```
+
+# OGD
+
+```{r}
+# function for online gradient descent (OGD)
+# type: "classification" or "regresssion"
+my_OGD = function(type) {
+  if (type!='classification'&&type!='regression') {
+    stop("Argument 'type' must be 'classification' or 'regression'")
+  }
+  if (type=='classification') {
+    
+  } else {
+    # type is regression
+  }
+}
+
 
 ```
 
