@@ -8,15 +8,15 @@ output: pdf_document
 # Simulate data for regression and classification
 ```{r}
 # simulate data: regression
-n = 100 # sample size
-p = 200 # number of predictors
+n = 1000 # sample size
+p = 2000 # number of predictors
 
 # beta
 k = round(0.05*p, 0) # number of nonzero coefficients
-sd_beta = 0.1
+sd_beta = 0.01
 nonzero_indexes = sample.int(n=p, size=k)
 beta = rep(0, p)
-beta[nonzero_indexes] = rnorm(n=k, mean=0, sd=sd_beta)
+beta[nonzero_indexes] = rnorm(n=k, mean=5, sd=sd_beta)
 sum(which(beta !=0) != sort(nonzero_indexes)) # test that we made the right indexes nonzero
 beta = as.matrix(beta)
 
@@ -31,7 +31,9 @@ E = matrix(rnorm(n=n, mean=0, sd=1), nrow=n)
 Y = X%*%beta + E
 
 # note that in the online setting, each t^th row of X and Y is for time t
+```
 
+```{r}
 # simulate data: classification
 # X, beta same as above
 probs = 1/(1+exp(-X%*%beta))
@@ -43,17 +45,38 @@ Y = rbinom(n=n, size=1, prob = probs) # Bernoulli
 ```{r}
 # function for online gradient descent (OGD)
 # type: "classification" or "regresssion"
-my_OGD = function(type) {
+# X: rows are observations, columns are predictors
+# Y: response variable
+# learning rate (constant)
+# beta_0: initialization for the estimate
+# N: number of iterations for each data point (each row of X, Y)
+# returns betahats for each data point and its N interations as a 3D array
+my_OGD = function(type, X, Y, lr, beta_0, N) {
   if (type!='classification'&&type!='regression') {
     stop("Argument 'type' must be 'classification' or 'regression'")
   }
+  
+  n = nrow(X)
+  betahats = array(data=rep(NA, n*p*N), dim = c(N, p, n)) # n arrays that are each Nxp arrays
+  betahats[1, , ] = beta_0 # initialize
   if (type=='classification') {
     
   } else {
     # type is regression
-  }
+    for (k in 1:n) { # for each data point (each row of X, Y)
+      for (i in 1:(N-1)) { # for each iteration
+      d_loss = 2*as.matrix(betahats[i, , k])%*%as.matrix(t(X[k, ]))%*%as.matrix(X[k, ])-2*as.matrix(X[k, ])%*%as.matrix(Y[k]) # OLS loss
+      betahats[i+1, , k] = betahats[i, , k] - lr*d_loss
+      } # end for i
+    } # end for k
+    return(betahats)
+  } # end else for regression
 }
+```
 
-
+```{r}
+# use my_OGD on generated data
+betahats = my_OGD(type="regression", X=X, Y=Y, lr=0.001, beta_0=rep(0, p), N=100)
+betahats
 ```
 
