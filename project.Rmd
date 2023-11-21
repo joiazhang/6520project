@@ -16,7 +16,7 @@ k = round(0.05*p, 0) # number of nonzero coefficients
 sd_beta = 0.01
 nonzero_indexes = sample.int(n=p, size=k)
 beta = rep(0, p)
-beta[nonzero_indexes] = rnorm(n=k, mean=5, sd=sd_beta)
+beta[nonzero_indexes] = rnorm(n=k, mean=100, sd=sd_beta)
 sum(which(beta !=0) != sort(nonzero_indexes)) # test that we made the right indexes nonzero
 beta = as.matrix(beta)
 
@@ -102,7 +102,9 @@ my_OGD = function(type, X, Y, lr, beta_0) {
 betahats = my_OGD(X=X, Y=Y, lr=0.00001, beta_0=rep(0, ncol(X)))
 rowMeans(betahats)
 plot(betahats[n, ] - beta)
-sum(abs(betahats[n, ] - beta) > 1) == k
+sum(abs(betahats[n, ] - beta) > 0.5*mean(beta[nonzero_indexes])) == k
+mean(betahats[n, nonzero_indexes]) - mean(betahats[n, -nonzero_indexes])
+plot(rowMeans(betahats[, nonzero_indexes]) - rowMeans(betahats[, -nonzero_indexes]), xlab="time", ylab="difference", main="difference in beta and betahat for the k non-negative coefficients")
 ```
 
 
