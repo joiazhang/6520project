@@ -99,12 +99,19 @@ my_OGD = function(type, X, Y, lr, beta_0) {
 ```
 
 ```{r}
-betahats = my_OGD(X=X, Y=Y, lr=0.00001, beta_0=rep(0, ncol(X)))
+betahats = my_OGD(X=X, Y=Y, lr=0.0000001, beta_0=runif(n))
 rowMeans(betahats)
-plot(betahats[n, ] - beta)
+plot(betahats[n, ] - beta, main="Differences between last estimate and true beta")
 sum(abs(betahats[n, ] - beta) > 0.5*mean(beta[nonzero_indexes])) == k
 mean(betahats[n, nonzero_indexes]) - mean(betahats[n, -nonzero_indexes])
-plot(rowMeans(betahats[, nonzero_indexes]) - rowMeans(betahats[, -nonzero_indexes]), xlab="time", ylab="difference", main="difference in beta and betahat for the k non-negative coefficients")
+
+temp = matrix(rep(beta, n), nrow=n, ncol=p, byrow=T)
+temp2 = betahats - temp
+plot(rowMeans(temp2^2), main="Error")
+
+plot(beta[nonzero_indexes], betahats[n, nonzero_indexes], main="K non-zero indexes for estimated and true betas")
+plot(beta, main="True betas")
+plot(betahats[n, ], main="Estimated betas")
 ```
 
 
