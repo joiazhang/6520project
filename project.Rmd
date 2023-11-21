@@ -8,8 +8,8 @@ output: pdf_document
 # Simulate data for regression and classification
 ```{r}
 # simulate data: regression
-n = 1000 # sample size
-p = 2000 # number of predictors
+n = 100 # sample size
+p = 200 # number of predictors
 
 # beta
 k = round(0.05*p, 0) # number of nonzero coefficients
@@ -21,7 +21,7 @@ sum(which(beta !=0) != sort(nonzero_indexes)) # test that we made the right inde
 beta = as.matrix(beta)
 
 # x
-X = matrix(rnorm(n=n*p, mean=10, sd=2), nrow=n)
+X = matrix(rnorm(n=n*p, mean=0, sd=5), nrow=n)
 
 # epsilon
 E = matrix(rnorm(n=n, mean=0, sd=1), nrow=n)
@@ -76,7 +76,35 @@ my_OGD = function(type, X, Y, lr, beta_0, N) {
 
 ```{r}
 # use my_OGD on generated data
-betahats = my_OGD(type="regression", X=X, Y=Y, lr=0.001, beta_0=rep(0, p), N=100)
+betahats = my_OGD(type="regression", X=X, Y=Y, lr=0.00001, beta_0=rep(0, p), N=100)
 betahats
 ```
+
+```{r}
+# Online gradient descent for regression
+my_OGD = function(type, X, Y, lr, beta_0) {
+  n = nrow(X)
+  p = ncol(X)
+  betahats = matrix(nrow=n, ncol=p)
+  betahats[1, ] = beta_0
+  for (t in 1:(n-1)) {
+    x_t = as.matrix(X[t, ])
+    beta_t = as.matrix(betahats[t, ])
+    y_t_hat = t(beta_t)%*%x_t
+    Y_t = Y[t]
+    betahats[t+1, ] = beta_t - lr*as.numeric(y_t_hat-Y_t)*x_t
+  }
+  return(betahats)
+}
+```
+
+```{r}
+betahats = my_OGD(X=X, Y=Y, lr=0.00001, beta_0=rep(0, ncol(X)))
+rowMeans(betahats)
+plot(betahats[n, ] - beta)
+sum(abs(betahats[n, ] - beta) > 1) == k
+```
+
+
+
 
