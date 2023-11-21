@@ -4,6 +4,10 @@ author: "Minjia Jia and Joia Zhang"
 date: "Fall 2023"
 output: pdf_document
 ---
+```{r}
+set.seed(6520)
+```
+
 
 # Simulate data for regression and classification
 ```{r}
@@ -36,11 +40,44 @@ Y = X%*%beta + E
 ```{r}
 # simulate data: classification
 # X, beta same as above
-probs = 1/(1+exp(-X%*%beta))
-Y = rbinom(n=n, size=1, prob = probs) # Bernoulli
+# probs = 1/(1+exp(-X%*%beta))
+# Y = rbinom(n=n, size=1, prob = probs) # Bernoulli
 ```
 
 # OGD
+
+```{r}
+# Online gradient descent for regression
+my_OGD = function(type, X, Y, lr, beta_0) {
+  n = nrow(X)
+  p = ncol(X)
+  betahats = matrix(nrow=n, ncol=p)
+  betahats[1, ] = beta_0
+  for (t in 1:(n-1)) {
+    x_t = as.matrix(X[t, ])
+    beta_t = as.matrix(betahats[t, ])
+    y_t_hat = t(beta_t)%*%x_t
+    Y_t = Y[t]
+    betahats[t+1, ] = beta_t - lr*as.numeric(y_t_hat-Y_t)*x_t
+  }
+  return(betahats)
+}
+```
+
+```{r}
+betahats = my_OGD(X=X, Y=Y, lr=0.0000001, beta_0=runif(n))
+plot(betahats[n, ] - beta, main="Differences between last estimate and true beta")
+sum(abs(betahats[n, ] - beta) > 0.5*mean(beta[nonzero_indexes])) == k
+mean(betahats[n, nonzero_indexes]) - mean(betahats[n, -nonzero_indexes])
+
+temp = matrix(rep(beta, n), nrow=n, ncol=p, byrow=T)
+temp2 = betahats - temp
+plot(rowMeans(temp2^2), main="Error")
+
+plot(beta[nonzero_indexes], betahats[n, nonzero_indexes], main="K non-zero indexes for estimated and true betas")
+plot(beta, main="True betas")
+plot(betahats[n, ], main="Estimated betas")
+```
 
 ```{r}
 # function for online gradient descent (OGD)
@@ -77,42 +114,8 @@ my_OGD = function(type, X, Y, lr, beta_0, N) {
 ```{r}
 # use my_OGD on generated data
 betahats = my_OGD(type="regression", X=X, Y=Y, lr=0.00001, beta_0=rep(0, p), N=100)
-betahats
 ```
 
-```{r}
-# Online gradient descent for regression
-my_OGD = function(type, X, Y, lr, beta_0) {
-  n = nrow(X)
-  p = ncol(X)
-  betahats = matrix(nrow=n, ncol=p)
-  betahats[1, ] = beta_0
-  for (t in 1:(n-1)) {
-    x_t = as.matrix(X[t, ])
-    beta_t = as.matrix(betahats[t, ])
-    y_t_hat = t(beta_t)%*%x_t
-    Y_t = Y[t]
-    betahats[t+1, ] = beta_t - lr*as.numeric(y_t_hat-Y_t)*x_t
-  }
-  return(betahats)
-}
-```
-
-```{r}
-betahats = my_OGD(X=X, Y=Y, lr=0.0000001, beta_0=runif(n))
-rowMeans(betahats)
-plot(betahats[n, ] - beta, main="Differences between last estimate and true beta")
-sum(abs(betahats[n, ] - beta) > 0.5*mean(beta[nonzero_indexes])) == k
-mean(betahats[n, nonzero_indexes]) - mean(betahats[n, -nonzero_indexes])
-
-temp = matrix(rep(beta, n), nrow=n, ncol=p, byrow=T)
-temp2 = betahats - temp
-plot(rowMeans(temp2^2), main="Error")
-
-plot(beta[nonzero_indexes], betahats[n, nonzero_indexes], main="K non-zero indexes for estimated and true betas")
-plot(beta, main="True betas")
-plot(betahats[n, ], main="Estimated betas")
-```
 
 
 
