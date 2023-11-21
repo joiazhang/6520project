@@ -58,14 +58,18 @@ my_OGD = function(type, X, Y, lr, beta_0) {
     beta_t = as.matrix(betahats[t, ])
     y_t_hat = t(beta_t)%*%x_t
     Y_t = Y[t]
-    betahats[t+1, ] = beta_t - lr*as.numeric(y_t_hat-Y_t)*x_t
+    # betahats[t+1, ] = beta_t - lr*as.numeric(y_t_hat-Y_t)*x_t # least means squares
+    d_loss = 2*beta_t%*%t(x_t)%*%x_t - 2*x_t%*%Y_t
+    betahats[t+1, ] = beta_t - lr*d_loss
   }
   return(betahats)
 }
 ```
 
 ```{r}
-betahats = my_OGD(X=X, Y=Y, lr=0.0000001, beta_0=runif(n))
+beta_0 = runif(n)
+beta_0 = rep(0, p)
+betahats = my_OGD(X=X, Y=Y, lr=0.0000001, beta_0=beta_0)
 plot(betahats[n, ] - beta, main="Differences between last estimate and true beta")
 sum(abs(betahats[n, ] - beta) > 0.5*mean(beta[nonzero_indexes])) == k
 mean(betahats[n, nonzero_indexes]) - mean(betahats[n, -nonzero_indexes])
