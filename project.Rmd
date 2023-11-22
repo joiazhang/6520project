@@ -48,7 +48,7 @@ Y = X%*%beta + E
 
 ```{r}
 # Online gradient descent for regression
-my_OGD = function(type, X, Y, lr, beta_0) {
+my_OGD = function(X, Y, lr, beta_0) {
   n = nrow(X)
   p = ncol(X)
   betahats = matrix(nrow=n, ncol=p)
@@ -67,8 +67,8 @@ my_OGD = function(type, X, Y, lr, beta_0) {
 ```
 
 ```{r}
-beta_0 = runif(n)
-beta_0 = rep(0, p)
+beta_0 = runif(p)
+# beta_0 = rep(0, p)
 betahats = my_OGD(X=X, Y=Y, lr=0.0000001, beta_0=beta_0)
 plot(betahats[n, ] - beta, main="Differences between last estimate and true beta")
 sum(abs(betahats[n, ] - beta) > 0.5*mean(beta[nonzero_indexes])) == k
