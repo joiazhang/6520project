@@ -6,6 +6,8 @@ output: pdf_document
 ---
 ```{r}
 set.seed(6520)
+
+library(expm)
 ```
 
 
@@ -149,7 +151,7 @@ my_adagrad = function(X, Y, lr, beta_0, full) {
     
     if (full) {
       # full
-      betahats[t+1, ] = beta_t # TODO, maybe use built in functions for negative squre root
+      betahats[t+1, ] = beta_t - lr*as.matrix(solve(sqrtm(G_t)))%*%g_t
     } else {
       # diagonal
       betahats[t+1, ] = beta_t - lr*as.matrix(diag(diag(diag_G_t^(-1/2)), nrow=p, ncol=p))%*%g_t
