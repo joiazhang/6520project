@@ -40,8 +40,8 @@ Y = X%*%beta + E
 ```{r}
 # simulate data: classification
 # X, beta same as above
-# probs = 1/(1+exp(-X%*%beta))
-# Y = rbinom(n=n, size=1, prob = probs) # Bernoulli
+probs = 1/(1+exp(-X%*%beta))
+Y = rbinom(n=n, size=1, prob = probs) # Bernoulli
 ```
 
 # OGD
@@ -67,6 +67,7 @@ my_OGD = function(X, Y, lr, beta_0) {
 ```
 
 ```{r}
+# testing function
 beta_0 = runif(p)
 # beta_0 = rep(0, p)
 betahats = my_OGD(X=X, Y=Y, lr=0.0000001, beta_0=beta_0)
@@ -118,6 +119,59 @@ my_OGD = function(type, X, Y, lr, beta_0, N) {
 ```{r}
 # use my_OGD on generated data
 betahats = my_OGD(type="regression", X=X, Y=Y, lr=0.00001, beta_0=rep(0, p), N=100)
+```
+
+```{r}
+# Online gradient descent for regression
+my_OGD = function(X, Y, lr, beta_0) {
+  n = nrow(X)
+  p = ncol(X)
+  betahats = matrix(nrow=n, ncol=p)
+  betahats[1, ] = beta_0
+  
+  for (t in 1:(n-1)) {
+    x_t = as.matrix(X[t, ])
+    beta_t = as.matrix(betahats[t, ])
+    y_t_hat = t(beta_t)%*%x_t
+    Y_t = Y[t]
+    # betahats[t+1, ] = beta_t - lr*as.numeric(y_t_hat-Y_t)*x_t # least means squares
+    d_loss = 2*beta_t%*%t(x_t)%*%x_t - 2*x_t%*%Y_t
+    betahats[t+1, ] = beta_t - lr*d_loss
+  } # end for
+  return(betahats)
+}
+```
+
+```{r}
+# function for adaptive gradient descent (Adagrad)
+# X: rows are observations, columns are predictors
+# Y: response variable
+# lr: global learning rate
+# epsilon: noise for nonzero/invertibility
+# beta_0: weight initialization
+# full: boolean, uses full matrix for G if true, otherwise uses diagonal elements of G
+# rho: decay rate for Adadelta
+my_adagrad = function(X, Y, lr, epsilon, beta_0, full, rho) {
+  n = nrow(X)
+  p = ncol(X)
+  betahats = matrix(nrow=n, ncol=p)
+  betahats[1, ] = beta_0
+  H = list() # list of nxn matrices
+  g_vec = 
+  
+  for (t in 1:(n-1)) {
+    x_t = as.matrix(X[t, ])
+    beta_t = as.matrix(betahats[t, ])
+    y_t_hat = t(beta_t)%*%x_t
+    Y_t = Y[t]
+    H[[t]] = epsilon*diag(nrow=n) #+ TODO
+    # d_loss TODO
+    betahats[t+1, ] = beta_t - lr*d_loss # TODO update step
+  } # end for
+  return(betahats)
+}
+
+
 ```
 
 
