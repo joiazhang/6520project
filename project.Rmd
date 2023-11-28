@@ -180,5 +180,18 @@ plot(beta, main="True betas")
 plot(betahats[n, ], main="Estimated betas")
 ```
 
+# Analysis of $\hat\beta$'s
+
+Plots
+- Prediction error vs iterations
+- Estimation error vs iterations
+- Betahats for each dimension, nonzero vs zero indexes
+- Comparison of different learning rates
+- Run time of full vs diagonal Adagrad
+- Run time of OGD, Adagrad, etc
+- Variance of betahats across iterations?
+
+
+
 
 
