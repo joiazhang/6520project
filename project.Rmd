@@ -10,7 +10,6 @@ set.seed(6520)
 library(expm)
 ```
 
-
 # Simulate data for regression and classification
 ```{r}
 # simulate data: regression
@@ -95,32 +94,32 @@ plot(betahats[n, ], main="Estimated betas")
 # beta_0: initialization for the estimate
 # N: number of iterations for each data point (each row of X, Y)
 # returns betahats for each data point and its N interations as a 3D array
-my_OGD = function(type, X, Y, lr, beta_0, N) {
-  if (type!='classification'&&type!='regression') {
-    stop("Argument 'type' must be 'classification' or 'regression'")
-  }
-  
-  n = nrow(X)
-  betahats = array(data=rep(NA, n*p*N), dim = c(N, p, n)) # n arrays that are each Nxp arrays
-  betahats[1, , ] = beta_0 # initialize
-  if (type=='classification') {
-    
-  } else {
-    # type is regression
-    for (k in 1:n) { # for each data point (each row of X, Y)
-      for (i in 1:(N-1)) { # for each iteration
-      d_loss = 2*as.matrix(betahats[i, , k])%*%as.matrix(t(X[k, ]))%*%as.matrix(X[k, ])-2*as.matrix(X[k, ])%*%as.matrix(Y[k]) # OLS loss
-      betahats[i+1, , k] = betahats[i, , k] - lr*d_loss
-      } # end for i
-    } # end for k
-    return(betahats)
-  } # end else for regression
-}
+# my_OGD = function(type, X, Y, lr, beta_0, N) {
+#   if (type!='classification'&&type!='regression') {
+#     stop("Argument 'type' must be 'classification' or 'regression'")
+#   }
+#   
+#   n = nrow(X)
+#   betahats = array(data=rep(NA, n*p*N), dim = c(N, p, n)) # n arrays that are each Nxp arrays
+#   betahats[1, , ] = beta_0 # initialize
+#   if (type=='classification') {
+#     
+#   } else {
+#     # type is regression
+#     for (k in 1:n) { # for each data point (each row of X, Y)
+#       for (i in 1:(N-1)) { # for each iteration
+#       d_loss = 2*as.matrix(betahats[i, , k])%*%as.matrix(t(X[k, ]))%*%as.matrix(X[k, ])-2*as.matrix(X[k, ])%*%as.matrix(Y[k]) # OLS loss
+#       betahats[i+1, , k] = betahats[i, , k] - lr*d_loss
+#       } # end for i
+#     } # end for k
+#     return(betahats)
+#   } # end else for regression
+# }
 ```
 
 ```{r}
 # use my_OGD on generated data
-betahats = my_OGD(type="regression", X=X, Y=Y, lr=0.00001, beta_0=rep(0, p), N=100)
+# betahats = my_OGD(type="regression", X=X, Y=Y, lr=0.00001, beta_0=rep(0, p), N=100)
 ```
 
 ```{r}
@@ -159,10 +158,7 @@ my_adagrad = function(X, Y, lr, beta_0, full) {
   } # end for
   return(betahats)
 }
-
-
 ```
-
 
 ```{r}
 beta_0 = rep(0, nrow(X))
@@ -193,6 +189,18 @@ Plots
 - Run time of OGD, Adagrad, etc
 - Variance of betahats across iterations?
 
+```{r}
+betahats_ogd = my_OGD(X=X, Y=Y, lr=0.0000001, beta_0=rep(0, p))
+betahats_adagrad = my_adagrad(X=X, Y=Y, lr=0.0000001, beta_0=rep(0, p), full=F)
+```
+
+```{r}
+# plot prediction error vs iterations
+pred_err = colSums((X%*%t(betahats_ogd) - matrix(rep(Y, n), nrow=n, ncol=n, byrow=F))^2) # row of the inside matrix is observation, column is iteration
+plot(pred_err, xlab="Iteration", ylab="Prediction error", main="Online gradient descent (OGD)")
+pred_err = colSums((X%*%t(betahats_adagrad) - matrix(rep(Y, n), nrow=n, ncol=n, byrow=F))^2) # row of the inside matrix is observation, column is iteration
+plot(pred_err, xlab="Iteration", ylab="Prediction error", main="Adaptive gradient descent (Adagrad)")
+```
 
 
 
