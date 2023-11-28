@@ -122,27 +122,6 @@ betahats = my_OGD(type="regression", X=X, Y=Y, lr=0.00001, beta_0=rep(0, p), N=1
 ```
 
 ```{r}
-# Online gradient descent for regression
-my_OGD = function(X, Y, lr, beta_0) {
-  n = nrow(X)
-  p = ncol(X)
-  betahats = matrix(nrow=n, ncol=p)
-  betahats[1, ] = beta_0
-  
-  for (t in 1:(n-1)) {
-    x_t = as.matrix(X[t, ])
-    beta_t = as.matrix(betahats[t, ])
-    y_t_hat = t(beta_t)%*%x_t
-    Y_t = Y[t]
-    # betahats[t+1, ] = beta_t - lr*as.numeric(y_t_hat-Y_t)*x_t # least means squares
-    d_loss = 2*beta_t%*%t(x_t)%*%x_t - 2*x_t%*%Y_t
-    betahats[t+1, ] = beta_t - lr*d_loss
-  } # end for
-  return(betahats)
-}
-```
-
-```{r}
 # function for adaptive gradient descent (Adagrad)
 # X: rows are observations, columns are predictors
 # Y: response variable
@@ -150,23 +129,31 @@ my_OGD = function(X, Y, lr, beta_0) {
 # epsilon: noise for nonzero/invertibility
 # beta_0: weight initialization
 # full: boolean, uses full matrix for G if true, otherwise uses diagonal elements of G
-# rho: decay rate for Adadelta
-my_adagrad = function(X, Y, lr, epsilon, beta_0, full, rho) {
+my_adagrad = function(X, Y, lr, beta_0, full) {
   n = nrow(X)
   p = ncol(X)
   betahats = matrix(nrow=n, ncol=p)
   betahats[1, ] = beta_0
-  H = list() # list of nxn matrices
-  g_vec = 
+  g_vec = matrix(nrow=n, ncol=p) # save matrix for the gradients where each gradient g_t is the t^{th} row of the matrix
+  G_t = matrix(data=rep(0, p^2), nrow=p, ncol=p) # matrix that is a cumulative sum
   
   for (t in 1:(n-1)) {
     x_t = as.matrix(X[t, ])
     beta_t = as.matrix(betahats[t, ])
     y_t_hat = t(beta_t)%*%x_t
     Y_t = Y[t]
-    H[[t]] = epsilon*diag(nrow=n) #+ TODO
-    # d_loss TODO
-    betahats[t+1, ] = beta_t - lr*d_loss # TODO update step
+    g_vec[t, ] = 2*beta_t%*%t(x_t)%*%x_t - 2*x_t%*%Y_t
+    g_t = as.matrix(g_vec[t, ])
+    G_t = G_t + g_t%*%t(g_t)
+    diag_G_t = diag(diag(G_t), nrow=p, ncol=p)
+    
+    if (full) {
+      # full
+      betahats[t+1, ] = beta_t # TODO, maybe use built in functions for negative squre root
+    } else {
+      # diagonal
+      betahats[t+1, ] = beta_t - lr*as.matrix(diag(diag(diag_G_t^(-1/2)), nrow=p, ncol=p))%*%g_t
+    }
   } # end for
   return(betahats)
 }
@@ -175,6 +162,23 @@ my_adagrad = function(X, Y, lr, epsilon, beta_0, full, rho) {
 ```
 
 
+```{r}
+beta_0 = rep(0, nrow(X))
+betahats = my_adagrad(X=X, Y=Y, lr=0.0000001, beta_0=beta_0, full=F)
+
+# plotting
+plot(betahats[n, ] - beta, main="Differences between last estimate and true beta")
+sum(abs(betahats[n, ] - beta) > 0.5*mean(beta[nonzero_indexes])) == k
+mean(betahats[n, nonzero_indexes]) - mean(betahats[n, -nonzero_indexes])
+
+temp = matrix(rep(beta, n), nrow=n, ncol=p, byrow=T)
+temp2 = betahats - temp
+plot(rowMeans(temp2^2), main="Error")
+
+plot(beta[nonzero_indexes], betahats[n, nonzero_indexes], main="K non-zero indexes for estimated and true betas")
+plot(beta, main="True betas")
+plot(betahats[n, ], main="Estimated betas")
+```
 
 
 
