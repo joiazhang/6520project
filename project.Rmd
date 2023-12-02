@@ -227,18 +227,12 @@ my_adam = function(X, Y, lr, beta_0, rho_1, rho_2, epsilon) {
   betahats[1, ] = beta_0
   Ms[1, ] = rep(0, p)
   Rs[1, ] = rep(0, p)
-  # g_vec = matrix(nrow=n, ncol=p) # save matrix for the gradients where each gradient g_t is the t^{th} row of the matrix
-  # G_t = matrix(data=rep(0, p^2), nrow=p, ncol=p) # matrix that is a cumulative sum
   
   for (t in 1:(n-1)) {
     x_t = as.matrix(X[t, ])
     beta_t = as.matrix(betahats[t, ])
     y_t_hat = t(beta_t)%*%x_t
     Y_t = Y[t]
-    # g_vec[t, ] = 2*beta_t%*%t(x_t)%*%x_t - 2*x_t%*%Y_t
-    # g_t = as.matrix(g_vec[t, ])
-    # G_t = G_t + g_t%*%t(g_t)
-    # diag_G_t = diag(diag(G_t), nrow=p, ncol=p)
     d_loss = 2*beta_t%*%t(x_t)%*%x_t - 2*x_t%*%Y_t
     Ms[t+1, ] = rho_1*as.matrix(Ms[t, ]) + (1-rho_1)*d_loss*beta_t # TODO: is it matrix multiplication between d_loss and beta_t, what should the dimensions of M be
     Rs[t+1, ] = rho_2*as.matrix(Rs[t, ]) + (1-rho_2)*d_loss*beta_t^2 # TODO: is this elementwise squaring
