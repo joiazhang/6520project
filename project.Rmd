@@ -8,6 +8,8 @@ output: pdf_document
 set.seed(6520)
 
 library(expm)
+# devtools::install()
+library(onlinegrad)
 ```
 
 # Simulate data for regression and classification
@@ -43,113 +45,6 @@ Y = X%*%beta + E
 # X, beta same as above
 probs = 1/(1+exp(-X%*%beta))
 Y = rbinom(n=n, size=1, prob = probs) # Bernoulli
-```
-
-# OGD
-
-```{r}
-# Online gradient descent for regression
-# X: rows are observations, columns are predictors
-# Y: response variable
-# lr: global learning rate
-# beta_0: weight initialization
-my_OGD = function(X, Y, lr, beta_0) {
-  n = nrow(X)
-  p = ncol(X)
-  betahats = matrix(nrow=n, ncol=p)
-  betahats[1, ] = beta_0
-  for (t in 1:(n-1)) {
-    x_t = as.matrix(X[t, ])
-    beta_t = as.matrix(betahats[t, ])
-    y_t_hat = t(beta_t)%*%x_t
-    Y_t = Y[t]
-    d_loss = 2*beta_t%*%t(x_t)%*%x_t - 2*x_t%*%Y_t
-    betahats[t+1, ] = beta_t - lr*d_loss
-  }
-  return(betahats)
-}
-```
-
-# Adagrad
-
-```{r}
-# function for adaptive gradient descent (Adagrad)
-# X: rows are observations, columns are predictors
-# Y: response variable
-# lr: global learning rate
-# epsilon: noise for nonzero/invertibility
-# beta_0: weight initialization
-# full: boolean, uses full matrix for G if true, otherwise uses diagonal elements of G
-my_adagrad = function(X, Y, lr, beta_0, full) {
-  n = nrow(X)
-  p = ncol(X)
-  betahats = matrix(nrow=n, ncol=p)
-  betahats[1, ] = beta_0
-  g_vec = matrix(nrow=n, ncol=p) # save matrix for the gradients where each gradient g_t is the t^{th} row of the matrix
-  G_t = matrix(data=rep(0, p^2), nrow=p, ncol=p) # matrix that is a cumulative sum
-  
-  for (t in 1:(n-1)) {
-    x_t = as.matrix(X[t, ])
-    beta_t = as.matrix(betahats[t, ])
-    y_t_hat = t(beta_t)%*%x_t
-    Y_t = Y[t]
-    g_vec[t, ] = 2*beta_t%*%t(x_t)%*%x_t - 2*x_t%*%Y_t
-    g_t = as.matrix(g_vec[t, ])
-    G_t = G_t + g_t%*%t(g_t)
-    diag_G_t = diag(diag(G_t), nrow=p, ncol=p)
-    
-    if (full) {
-      # full
-      betahats[t+1, ] = beta_t - lr*as.matrix(solve(sqrtm(G_t)))%*%g_t
-    } else {
-      # diagonal
-      betahats[t+1, ] = beta_t - lr*as.matrix(diag(diag(diag_G_t^(-1/2)), nrow=p, ncol=p))%*%g_t
-    }
-  } # end for
-  return(betahats)
-}
-```
-
-# Adam 
-
-```{r}
-# function for adaptive moment estimation (Adam)
-# X: rows are observations, columns are predictors
-# Y: response variable
-# lr: global learning rate (typical choice 0.001)
-# beta_0: weight initialization
-# epsilon: positive noise for nonzero/invertibility (typical choice 10^{-8})
-# rho_1: 1st moment decay rate (typical choice 0.9)
-# rho_2: 2nd moment decay rate (typical choice 0.999)
-my_adam = function(X, Y, lr, beta_0, rho_1, rho_2, epsilon) {
-  n = nrow(X)
-  p = ncol(X)
-  betahats = matrix(nrow=n, ncol=p)
-  Ms = matrix(nrow=n, ncol=p) # 1st moment estimate
-  Rs = matrix(nrow=n, ncol=p) # 2nd moment estimate
-  Mhats = matrix(nrow=n, ncol=p) # 1st moment bias correction
-  Rhats = matrix(nrow=n, ncol=p) # 2nd moment bias correction
-  
-  # initialize
-  betahats[1, ] = beta_0
-  Ms[1, ] = rep(0, p)
-  Rs[1, ] = rep(0, p)
-  
-  for (t in 1:(n-1)) {
-    x_t = as.matrix(X[t, ])
-    beta_t = as.matrix(betahats[t, ])
-    y_t_hat = t(beta_t)%*%x_t
-    Y_t = Y[t]
-    d_loss = 2*beta_t%*%t(x_t)%*%x_t - 2*x_t%*%Y_t
-    Ms[t+1, ] = rho_1*as.matrix(Ms[t, ]) + (1-rho_1)*d_loss
-    Rs[t+1, ] = rho_2*as.matrix(Rs[t, ]) + (1-rho_2)*d_loss^2
-    Mhats[t+1, ] = Ms[t, ] / (1-rho_1^t)
-    Rhats[t+1, ] = Rs[t, ] / (1-rho_2^t)
-    
-    betahats[t+1, ] = beta_t - lr*(Mhats[t+1, ]/(sqrt(Rhats[t+1, ]+epsilon))) # update
-  } # end for
-  return(betahats)
-}
 ```
 
 # Analysis of $\hat\beta$'s
