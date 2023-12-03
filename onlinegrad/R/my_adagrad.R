@@ -24,6 +24,7 @@ my_adagrad = function(X, Y, lr, beta_0, full) {
   runtimes = rep(NA, n)
   runtimes[1] = 0
   
+  print("before for")
   for (t in 1:(n-1)) {
     start_time = Sys.time()
     x_t = as.matrix(X[t, ])
@@ -37,13 +38,16 @@ my_adagrad = function(X, Y, lr, beta_0, full) {
     
     if (full) {
       # full
-      betahats[t+1, ] = beta_t - lr*as.matrix(solve(as.matrix(sqrtm(G_t))))%*%g_t
+      print("before")
+      betahats[t+1, ] = beta_t - lr*as.matrix(solve(as.matrix(expm::sqrtm(G_t))))%*%g_t
+      print("after")
     } else {
       # diagonal
       betahats[t+1, ] = beta_t - lr*as.matrix(diag(diag(diag_G_t^(-1/2)), nrow=p, ncol=p))%*%g_t
     }
     end_time = Sys.time()
     runtimes[t+1] = runtimes[t] + (end_time - start_time)
+    print("outside ifelse")
   } # end for
   return(list(betahats, runtimes))
 }

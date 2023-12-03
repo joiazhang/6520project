@@ -208,17 +208,17 @@ plot_betas(betahats, beta, nonzero_indexes, nonzero=F)
 
 
 ```{r}
-# print("Full")
-# temp = my_adagrad(X=X, Y=Y, lr=0.0000001, beta_0=rep(0, p), full=T)
-# betahats = temp[[1]]
-# runtimes = temp[[2]]
-# runtime_df$full = runtimes
-# 
-# pred_df$full = plot_prediction_error(betahats, beta, X, Y, title="Adaptive gradient descent (Adagrad)", type="prediction")
-# est_df$full = plot_prediction_error(betahats, beta, X, Y, title="Adaptive gradient descent (Adagrad)", type="estimation")
-# 
-# plot_betas(betahats, beta, nonzero_indexes, nonzero=T)
-# plot_betas(betahats, beta, nonzero_indexes, nonzero=F)
+print("Full")
+temp = my_adagrad(X=X, Y=Y, lr=0.0000001, beta_0=rep(0, p), full=T)
+betahats = temp[[1]]
+runtimes = temp[[2]]
+runtime_df$full = runtimes
+
+pred_df$full = plot_prediction_error(betahats, beta, X, Y, title="Adaptive gradient descent (Adagrad)", type="prediction")
+est_df$full = plot_prediction_error(betahats, beta, X, Y, title="Adaptive gradient descent (Adagrad)", type="estimation")
+
+plot_betas(betahats, beta, nonzero_indexes, nonzero=T)
+plot_betas(betahats, beta, nonzero_indexes, nonzero=F)
 ```
 
 
