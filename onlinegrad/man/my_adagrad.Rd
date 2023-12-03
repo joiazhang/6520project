@@ -15,16 +15,15 @@ my_adagrad(X, Y, lr, beta_0, full)
 
 \item{beta_0}{An p x 1 vector that is the initialization for the coefficients.}
 
-\item{full}{boolean, if true uses the full G matrix for the update step, otherwise uses only the diagonal elements of G.}
+\item{full}{Boolean, if true uses the full G matrix for the update step, otherwise uses only the diagonal elements of G.}
 }
 \value{
 List where first elemnt is an n x p matrix where each ith row is the coefficients for the ith iteration and the columns are predictors and second element is a nx1 vector of runtimes for each iteration.
 }
 \description{
-Adaptive gradient descent for linear regression.
+Adagrad for regression
 }
 \examples{
 my_adagrad(X=X, Y=Y, lr=0.00001, beta_0=rep(0, ncol(X)), full=T)
 my_adagrad(X=X, Y=Y, lr=0.00001, beta_0=runif(ncol(X)), full=F)
-
 }

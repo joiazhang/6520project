@@ -1,18 +1,20 @@
 #' Adagrad for regression
+#' @import expm
 #' 
 #' Adaptive gradient descent for linear regression.
 #' @param X An n x p matrix of predictors where rows are observations and columns are predictors.
 #' @param Y An n x 1 vector quantitative response variable.
 #' @param lr A constant that is the learning rate.
 #' @param beta_0 An p x 1 vector that is the initialization for the coefficients.
-#' @param full boolean, if true uses the full G matrix for the update step, otherwise uses only the diagonal elements of G.
+#' @param full Boolean, if true uses the full G matrix for the update step, otherwise uses only the diagonal elements of G.
 #' @return List where first elemnt is an n x p matrix where each ith row is the coefficients for the ith iteration and the columns are predictors and second element is a nx1 vector of runtimes for each iteration.
 #' @examples
 #' my_adagrad(X=X, Y=Y, lr=0.00001, beta_0=rep(0, ncol(X)), full=T)
 #' my_adagrad(X=X, Y=Y, lr=0.00001, beta_0=runif(ncol(X)), full=F)
-#' 
 #' @export
 my_adagrad = function(X, Y, lr, beta_0, full) {
+  library(expm)
+  print("LOADED expm !!!!!!! \n\n\n\n\n\n\n\n\n\n")
   n = nrow(X)
   p = ncol(X)
   betahats = matrix(nrow=n, ncol=p)
@@ -35,7 +37,7 @@ my_adagrad = function(X, Y, lr, beta_0, full) {
     
     if (full) {
       # full
-      betahats[t+1, ] = beta_t - lr*as.matrix(solve(sqrtm(G_t)))%*%g_t
+      betahats[t+1, ] = beta_t - lr*as.matrix(solve(as.matrix(sqrtm(G_t))))%*%g_t
     } else {
       # diagonal
       betahats[t+1, ] = beta_t - lr*as.matrix(diag(diag(diag_G_t^(-1/2)), nrow=p, ncol=p))%*%g_t
