@@ -58,7 +58,7 @@ Plots
 + Betahats for each dimension, nonzero vs zero indexes
 - Comparison of different learning rates
 - Run time of full vs diagonal Adagrad
-- Run time of OGD, Adagrad, adam
++ Run time of OGD, Adagrad, adam
 - Variance of betahats across iterations?
 
 ```{r}
