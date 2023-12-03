@@ -58,7 +58,7 @@ Plots
 + Betahats for each dimension, nonzero vs zero indexes
 - Comparison of different learning rates
 - Run time of full vs diagonal Adagrad
-- Run time of OGD, Adagrad, etc
+- Run time of OGD, Adagrad, adam
 - Variance of betahats across iterations?
 
 ```{r}
@@ -92,6 +92,7 @@ plot_prediction_error = function(betahats, beta, X, Y, title, type) {
 
 ```{r}
 # plot last iteration of betahat for nonzero vs zero indexes, true beta overlaid
+# nonzero_indexes: kx1 vector of indexes where the k-sparse vector true beta has nonzero values
 # nonzero: boolean, if true plot only nonzero indexes (k indexes of the true k-sparse beta), otherwise plot zero indexes
 plot_betas = function(betahats, beta, nonzero_indexes, nonzero=T) {
   n = nrow(betahats)
@@ -109,7 +110,6 @@ plot_betas = function(betahats, beta, nonzero_indexes, nonzero=T) {
     xlab("p") +
     ylab("") +
     ggtitle(title)
-    
 }
 ```
 
@@ -135,11 +135,6 @@ plot_prediction_error(betahats, beta, X, Y, title="Adaptive moment estimation (A
 plot_prediction_error(betahats, beta, X, Y, title="Adaptive moment estimation (Adam)", type="estimation")
 plot_betas(betahats, beta, nonzero_indexes, nonzero=T)
 plot_betas(betahats, beta, nonzero_indexes, nonzero=F)
-```
-
-
-```{r}
-# plot betahats for each dimension, nonzero vs zero indexes
 ```
 
 
