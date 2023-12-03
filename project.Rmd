@@ -86,7 +86,9 @@ plot_prediction_error = function(betahats, beta, X, Y, title, type) {
     err = sqrt(rowSums((betahats - beta)^2))
     ylab = "Estimation error"
   }
-  plot(as.matrix(err), xlab="Iteration", ylab=ylab, main=title)
+  err = as.matrix(err)
+  plot(err, xlab="Iteration", ylab=ylab, main=title)
+  return(err)
 }
 ```
 
@@ -116,6 +118,8 @@ plot_betas = function(betahats, beta, nonzero_indexes, nonzero=T) {
 
 ```{r}
 runtime_df = data.frame("n"=1:n)
+pred_df = data.frame("n"=1:n) # prediction error
+est_df = data.frame("n"=1:n) # estimation error
 
 # OGD
 temp = my_OGD(X=X, Y=Y, lr=0.0000001, beta_0=rep(0, p))
@@ -123,8 +127,9 @@ betahats = temp[[1]]
 runtimes = temp[[2]]
 runtime_df$ogd = runtimes
 
-plot_prediction_error(betahats, beta, X, Y, title="Online gradient descent (OGD)", type="prediction") # prediction error
-plot_prediction_error(betahats, beta, X, Y, title="Online gradient descent (OGD)", type="estimation") # estimation error
+pred_df$ogd = plot_prediction_error(betahats, beta, X, Y, title="Online gradient descent (OGD)", type="prediction")
+est_df$ogd = plot_prediction_error(betahats, beta, X, Y, title="Online gradient descent (OGD)", type="estimation")
+
 plot_betas(betahats, beta, nonzero_indexes, nonzero=T) # nonzero indexes
 plot_betas(betahats, beta, nonzero_indexes, nonzero=F) # zero indexes
 
@@ -134,8 +139,9 @@ betahats = temp[[1]]
 runtimes = temp[[2]]
 runtime_df$adagrad = runtimes
 
-plot_prediction_error(betahats, beta, X, Y, title="Adaptive gradient descent (Adagrad)", type="prediction")
-plot_prediction_error(betahats, beta, X, Y, title="Adaptive gradient descent (Adagrad)", type="estimation")
+pred_df$adagrad = plot_prediction_error(betahats, beta, X, Y, title="Adaptive gradient descent (Adagrad)", type="prediction")
+est_df$adagrad = plot_prediction_error(betahats, beta, X, Y, title="Adaptive gradient descent (Adagrad)", type="estimation")
+
 plot_betas(betahats, beta, nonzero_indexes, nonzero=T)
 plot_betas(betahats, beta, nonzero_indexes, nonzero=F)
 
@@ -145,19 +151,40 @@ betahats = temp[[1]]
 runtimes = temp[[2]]
 runtime_df$adam = runtimes
 
-plot_prediction_error(betahats, beta, X, Y, title="Adaptive moment estimation (Adam)", type="prediction")
-plot_prediction_error(betahats, beta, X, Y, title="Adaptive moment estimation (Adam)", type="estimation")
+pred_df$adam = plot_prediction_error(betahats, beta, X, Y, title="Adaptive moment estimation (Adam)", type="prediction")
+est_df$adam = plot_prediction_error(betahats, beta, X, Y, title="Adaptive moment estimation (Adam)", type="estimation")
+
 plot_betas(betahats, beta, nonzero_indexes, nonzero=T)
 plot_betas(betahats, beta, nonzero_indexes, nonzero=F)
+
+# plot prediction error for ogd, adagrad, adam
+ggplot(pred_df, aes(x=n)) + 
+  geom_line(aes(y=ogd), color="red") +
+  geom_line(aes(y=adagrad), color="blue") +
+  geom_line(aes(y=adam), linetype="dashed") +
+  xlab("Iteration") +
+  ylab("") +
+  ggtitle("Prediction error for OGD (red), Adagrad (blue), Adam (black)")
+
+# plot estimation error for ogd, adagrad, adam
+ggplot(est_df, aes(x=n)) + 
+  geom_line(aes(y=ogd), color="red") +
+  geom_line(aes(y=adagrad), color="blue") +
+  geom_line(aes(y=adam), linetype="dashed") +
+  xlab("Iteration") +
+  ylab("") +
+  ggtitle("Estimation error for OGD (red), Adagrad (blue), Adam (black)")
 
 # plot runtime for ogd, adagrad, adam
 ggplot(runtime_df, aes(x=n)) + 
   geom_line(aes(y=ogd), color="red") +
   geom_line(aes(y=adagrad), color="blue") +
-  geom_line(aes(y=adam)) +
+  geom_line(aes(y=adam), linetype="dashed") +
   xlab("Iteration") +
   ylab("") +
   ggtitle("Runtime for OGD (red), Adagrad (blue), Adam (black)")
+
+
 ```
 
 
