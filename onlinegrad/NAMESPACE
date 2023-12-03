@@ -2,3 +2,4 @@
 
 export(my_OGD)
 export(my_adagrad)
+export(my_adam)
