@@ -8,7 +8,7 @@
 #' @param rho_1 constant for 1st moment decay rate
 #' @param rho_2 constant for 2nd moment decay rate
 #' @param epsilon positive constant for nonzero/invertibility
-#' @return An n x p matrix where each ith row is the coefficients for the ith iteration and the columns are predictors.
+#' @return List where first elemnt is an n x p matrix where each ith row is the coefficients for the ith iteration and the columns are predictors and second element is a nx1 vector of runtimes for each iteration.
 #' @examples
 #' my_adam(X=X, Y=Y, lr=0.0000001, beta_0=rep(0, p), rho_1=0.9, rho_2=0.999, epsilon=1e-8)
 #' 
@@ -21,6 +21,8 @@ my_adam = function(X, Y, lr, beta_0, rho_1, rho_2, epsilon) {
   Rs = matrix(nrow=n, ncol=p) # 2nd moment estimate
   Mhats = matrix(nrow=n, ncol=p) # 1st moment bias correction
   Rhats = matrix(nrow=n, ncol=p) # 2nd moment bias correction
+  runtimes = rep(NA, n)
+  runtimes[1] = 0
   
   # initialize
   betahats[1, ] = beta_0
@@ -28,6 +30,7 @@ my_adam = function(X, Y, lr, beta_0, rho_1, rho_2, epsilon) {
   Rs[1, ] = rep(0, p)
   
   for (t in 1:(n-1)) {
+    start_time = Sys.time()
     x_t = as.matrix(X[t, ])
     beta_t = as.matrix(betahats[t, ])
     y_t_hat = t(beta_t)%*%x_t
@@ -39,6 +42,9 @@ my_adam = function(X, Y, lr, beta_0, rho_1, rho_2, epsilon) {
     Rhats[t+1, ] = Rs[t, ] / (1-rho_2^t)
     
     betahats[t+1, ] = beta_t - lr*(Mhats[t+1, ]/(sqrt(Rhats[t+1, ]+epsilon))) # update
+    end_time = Sys.time()
+    runtimes[t+1] = runtimes[t] + (end_time - start_time)
   } # end for
-  return(betahats)
+  return(list(betahats, runtimes))
 }
+

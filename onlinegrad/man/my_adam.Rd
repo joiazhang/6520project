@@ -22,7 +22,7 @@ my_adam(X, Y, lr, beta_0, rho_1, rho_2, epsilon)
 \item{epsilon}{positive constant for nonzero/invertibility}
 }
 \value{
-An n x p matrix where each ith row is the coefficients for the ith iteration and the columns are predictors.
+List where first elemnt is an n x p matrix where each ith row is the coefficients for the ith iteration and the columns are predictors and second element is a nx1 vector of runtimes for each iteration.
 }
 \description{
 Adaptive moment estimation for linear regression.

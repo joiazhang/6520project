@@ -16,7 +16,7 @@ my_OGD(X, Y, lr, beta_0)
 \item{beta_0}{An p x 1 vector that is the initialization for the coefficients.}
 }
 \value{
-An n x p matrix where each ith row is the coefficients for the ith iteration and the columns are predictors.
+List where first elemnt is an n x p matrix where each ith row is the coefficients for the ith iteration and the columns are predictors and second element is a nx1 vector of runtimes for each iteration.
 }
 \description{
 Online gradient descent for linear regression.
