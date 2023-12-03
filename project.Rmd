@@ -170,27 +170,43 @@ Plots
 # X: rows are observations, columns are predictors
 # Y: response variable
 # betahats: n x p matrix where each ith row is the coefficients for the ith iteration and the columns are predictors
+# beta: true beta coefficient px1 vector
 # title: string for the title of the plot
-plot_prediction_error = function(betahats, X, Y, title) {
+# type: "prediction" or "estimation" for prediction error or estimation error
+plot_prediction_error = function(betahats, beta, X, Y, title, type) {
   n = nrow(X)
   p = ncol(X)
-  pred_err = colSums((X%*%t(betahats) - matrix(rep(Y, n), nrow=n, ncol=n, byrow=F))^2) # row of the inside matrix is observation, column is iteration
-  plot(pred_err, xlab="Iteration", ylab="Prediction error", main=title)
+  # if ((type!="prediction") && (type!="estimation")) {
+  #   stop("type parameter must be 'prediction' or 'estimation'")
+  # }
+  if (type=="prediction") {
+    # prediction error
+    err = colSums((X%*%t(betahats) - matrix(rep(Y, n), nrow=n, ncol=n, byrow=F))^2) # row of the inside matrix is observation, column is iteration
+    ylab = "Prediction error"
+  } else {
+    # estimation error
+    beta = t(beta)
+    beta = matrix(rep(beta, n),nrow=n, byrow=T) # row combine n number of t(beta)'s
+    err = rowSums((betahats - beta)^2) # TODO: should we have the squareroot of the l2 norm
+    ylab = "Estimation error"
+  }
+  plot(as.matrix(err), xlab="Iteration", ylab=ylab, main=title)
 }
 ```
 
 ```{r}
 # OGD
 betahats = my_OGD(X=X, Y=Y, lr=0.0000001, beta_0=rep(0, p))
-plot_prediction_error(betahats, X, Y, "Online gradient descent (OGD)")
+plot_prediction_error(betahats=betahats, beta=beta, X=X, Y=Y, title="Online gradient descent (OGD)", type="prediction")
+plot_prediction_error(betahats=betahats, beta=beta, X=X, Y=Y, title="Online gradient descent (OGD)", type="estimation")
 
 # Adagrad
 betahats = my_adagrad(X=X, Y=Y, lr=0.0000001, beta_0=rep(0, p), full=F)
-plot_prediction_error(betahats, X, Y, "Adaptive gradient descent (Adagrad)")
+plot_prediction_error(betahats, X, Y, title="Adaptive gradient descent (Adagrad)", type="prediction")
 
 # Adam
 betahats = my_adam(X=X, Y=Y, lr=0.0000001, beta_0=rep(0, p), rho_1=0.9, rho_2=0.999, epsilon=1e-8)
-plot_prediction_error(betahats, X, Y, "Adaptive moment estimation (Adam)")
+plot_prediction_error(betahats, X, Y, title="Adaptive moment estimation (Adam)", type="prediction")
 ```
 
 
