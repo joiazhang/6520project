@@ -49,6 +49,10 @@ Y = rbinom(n=n, size=1, prob = probs) # Bernoulli
 
 ```{r}
 # Online gradient descent for regression
+# X: rows are observations, columns are predictors
+# Y: response variable
+# lr: global learning rate
+# beta_0: weight initialization
 my_OGD = function(X, Y, lr, beta_0) {
   n = nrow(X)
   p = ncol(X)
@@ -59,7 +63,6 @@ my_OGD = function(X, Y, lr, beta_0) {
     beta_t = as.matrix(betahats[t, ])
     y_t_hat = t(beta_t)%*%x_t
     Y_t = Y[t]
-    # betahats[t+1, ] = beta_t - lr*as.numeric(y_t_hat-Y_t)*x_t # least means squares
     d_loss = 2*beta_t%*%t(x_t)%*%x_t - 2*x_t%*%Y_t
     betahats[t+1, ] = beta_t - lr*d_loss
   }
@@ -67,60 +70,7 @@ my_OGD = function(X, Y, lr, beta_0) {
 }
 ```
 
-```{r}
-# testing function
-beta_0 = runif(p)
-# beta_0 = rep(0, p)
-betahats = my_OGD(X=X, Y=Y, lr=0.0000001, beta_0=beta_0)
-plot(betahats[n, ] - beta, main="Differences between last estimate and true beta")
-sum(abs(betahats[n, ] - beta) > 0.5*mean(beta[nonzero_indexes])) == k
-mean(betahats[n, nonzero_indexes]) - mean(betahats[n, -nonzero_indexes])
-
-temp = matrix(rep(beta, n), nrow=n, ncol=p, byrow=T)
-temp2 = betahats - temp
-plot(rowMeans(temp2^2), main="Error")
-
-plot(beta[nonzero_indexes], betahats[n, nonzero_indexes], main="K non-zero indexes for estimated and true betas")
-plot(beta, main="True betas")
-plot(betahats[n, ], main="Estimated betas")
-```
-
-```{r}
-# function for online gradient descent (OGD)
-# type: "classification" or "regresssion"
-# X: rows are observations, columns are predictors
-# Y: response variable
-# learning rate (constant)
-# beta_0: initialization for the estimate
-# N: number of iterations for each data point (each row of X, Y)
-# returns betahats for each data point and its N interations as a 3D array
-# my_OGD = function(type, X, Y, lr, beta_0, N) {
-#   if (type!='classification'&&type!='regression') {
-#     stop("Argument 'type' must be 'classification' or 'regression'")
-#   }
-#   
-#   n = nrow(X)
-#   betahats = array(data=rep(NA, n*p*N), dim = c(N, p, n)) # n arrays that are each Nxp arrays
-#   betahats[1, , ] = beta_0 # initialize
-#   if (type=='classification') {
-#     
-#   } else {
-#     # type is regression
-#     for (k in 1:n) { # for each data point (each row of X, Y)
-#       for (i in 1:(N-1)) { # for each iteration
-#       d_loss = 2*as.matrix(betahats[i, , k])%*%as.matrix(t(X[k, ]))%*%as.matrix(X[k, ])-2*as.matrix(X[k, ])%*%as.matrix(Y[k]) # OLS loss
-#       betahats[i+1, , k] = betahats[i, , k] - lr*d_loss
-#       } # end for i
-#     } # end for k
-#     return(betahats)
-#   } # end else for regression
-# }
-```
-
-```{r}
-# use my_OGD on generated data
-# betahats = my_OGD(type="regression", X=X, Y=Y, lr=0.00001, beta_0=rep(0, p), N=100)
-```
+# Adagrad
 
 ```{r}
 # function for adaptive gradient descent (Adagrad)
@@ -160,50 +110,7 @@ my_adagrad = function(X, Y, lr, beta_0, full) {
 }
 ```
 
-```{r}
-beta_0 = rep(0, nrow(X))
-betahats = my_adagrad(X=X, Y=Y, lr=0.0000001, beta_0=beta_0, full=F)
-
-# plotting
-plot(betahats[n, ] - beta, main="Differences between last estimate and true beta")
-sum(abs(betahats[n, ] - beta) > 0.5*mean(beta[nonzero_indexes])) == k
-mean(betahats[n, nonzero_indexes]) - mean(betahats[n, -nonzero_indexes])
-
-temp = matrix(rep(beta, n), nrow=n, ncol=p, byrow=T)
-temp2 = betahats - temp
-plot(rowMeans(temp2^2), main="Error")
-
-plot(beta[nonzero_indexes], betahats[n, nonzero_indexes], main="K non-zero indexes for estimated and true betas")
-plot(beta, main="True betas")
-plot(betahats[n, ], main="Estimated betas")
-```
-
-# Analysis of $\hat\beta$'s
-
-Plots
-+ Prediction error vs iterations
-- Estimation error vs iterations
-- Betahats for each dimension, nonzero vs zero indexes
-- Comparison of different learning rates
-- Run time of full vs diagonal Adagrad
-- Run time of OGD, Adagrad, etc
-- Variance of betahats across iterations?
-
-```{r}
-betahats_ogd = my_OGD(X=X, Y=Y, lr=0.0000001, beta_0=rep(0, p))
-betahats_adagrad = my_adagrad(X=X, Y=Y, lr=0.0000001, beta_0=rep(0, p), full=F)
-```
-
-```{r}
-# plot prediction error vs iterations
-pred_err = colSums((X%*%t(betahats_ogd) - matrix(rep(Y, n), nrow=n, ncol=n, byrow=F))^2) # row of the inside matrix is observation, column is iteration
-plot(pred_err, xlab="Iteration", ylab="Prediction error", main="Online gradient descent (OGD)")
-pred_err = colSums((X%*%t(betahats_adagrad) - matrix(rep(Y, n), nrow=n, ncol=n, byrow=F))^2) # row of the inside matrix is observation, column is iteration
-plot(pred_err, xlab="Iteration", ylab="Prediction error", main="Adaptive gradient descent (Adagrad)")
-```
-
-
-
+# Adam 
 
 ```{r}
 # function for adaptive moment estimation (Adam)
@@ -245,20 +152,31 @@ my_adam = function(X, Y, lr, beta_0, rho_1, rho_2, epsilon) {
 }
 ```
 
+# Analysis of $\hat\beta$'s
+
+Plots
++ Prediction error vs iterations
+- Estimation error vs iterations
+- Betahats for each dimension, nonzero vs zero indexes
+- Comparison of different learning rates
+- Run time of full vs diagonal Adagrad
+- Run time of OGD, Adagrad, etc
+- Variance of betahats across iterations?
+
+# Plots
+
 ```{r}
-betahats = my_adam(X=X, Y=Y, lr=0.001, beta_0=runif(p), rho_1=0.9, rho_2=0.999, epsilon=10^(-8))
-
-plot(betahats[n, ] - beta, main="Differences between last estimate and true beta")
-sum(abs(betahats[n, ] - beta) > 0.5*mean(beta[nonzero_indexes])) == k
-mean(betahats[n, nonzero_indexes]) - mean(betahats[n, -nonzero_indexes])
-
-temp = matrix(rep(beta, n), nrow=n, ncol=p, byrow=T)
-temp2 = betahats - temp
-plot(rowMeans(temp2^2), main="Error")
-
-plot(beta[nonzero_indexes], betahats[n, nonzero_indexes], main="K non-zero indexes for estimated and true betas")
-plot(beta, main="True betas")
-plot(betahats[n, ], main="Estimated betas")
+betahats_ogd = my_OGD(X=X, Y=Y, lr=0.0000001, beta_0=rep(0, p))
+betahats_adagrad = my_adagrad(X=X, Y=Y, lr=0.0000001, beta_0=rep(0, p), full=F)
 ```
+
+```{r}
+# plot prediction error vs iterations
+pred_err = colSums((X%*%t(betahats_ogd) - matrix(rep(Y, n), nrow=n, ncol=n, byrow=F))^2) # row of the inside matrix is observation, column is iteration
+plot(pred_err, xlab="Iteration", ylab="Prediction error", main="Online gradient descent (OGD)")
+pred_err = colSums((X%*%t(betahats_adagrad) - matrix(rep(Y, n), nrow=n, ncol=n, byrow=F))^2) # row of the inside matrix is observation, column is iteration
+plot(pred_err, xlab="Iteration", ylab="Prediction error", main="Adaptive gradient descent (Adagrad)")
 ```
+
+
 
