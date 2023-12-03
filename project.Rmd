@@ -7,6 +7,7 @@ output: pdf_document
 ```{r}
 rm(list=ls())
 set.seed(6520)
+library(ggplot2)
 
 library(expm)
 setwd("/Users/jwz34/Documents/Github/6520project/onlinegrad/R")
@@ -53,17 +54,15 @@ Y = rbinom(n=n, size=1, prob = probs) # Bernoulli
 
 Plots
 + Prediction error vs iterations
-- Estimation error vs iterations
-- Betahats for each dimension, nonzero vs zero indexes
++ Estimation error vs iterations
++ Betahats for each dimension, nonzero vs zero indexes
 - Comparison of different learning rates
 - Run time of full vs diagonal Adagrad
 - Run time of OGD, Adagrad, etc
 - Variance of betahats across iterations?
 
-# Plots
-
 ```{r}
-# plot prediction error
+# plot prediction or estimation error
 # X: rows are observations, columns are predictors
 # Y: response variable
 # betahats: n x p matrix where each ith row is the coefficients for the ith iteration and the columns are predictors
@@ -73,9 +72,9 @@ Plots
 plot_prediction_error = function(betahats, beta, X, Y, title, type) {
   n = nrow(X)
   p = ncol(X)
-  # if ((type!="prediction") && (type!="estimation")) {
-  #   stop("type parameter must be 'prediction' or 'estimation'")
-  # }
+  if ((type!="prediction") && (type!="estimation")) {
+    stop("type parameter must be 'prediction' or 'estimation'")
+  }
   if (type=="prediction") {
     # prediction error
     err = colSums((X%*%t(betahats) - matrix(rep(Y, n), nrow=n, ncol=n, byrow=F))^2) # row of the inside matrix is observation, column is iteration
@@ -84,7 +83,7 @@ plot_prediction_error = function(betahats, beta, X, Y, title, type) {
     # estimation error
     beta = t(beta)
     beta = matrix(rep(beta, n),nrow=n, byrow=T) # row combine n number of t(beta)'s
-    err = rowSums((betahats - beta)^2) # TODO: should we have the squareroot of the l2 norm
+    err = sqrt(rowSums((betahats - beta)^2))
     ylab = "Estimation error"
   }
   plot(as.matrix(err), xlab="Iteration", ylab=ylab, main=title)
@@ -92,23 +91,56 @@ plot_prediction_error = function(betahats, beta, X, Y, title, type) {
 ```
 
 ```{r}
+# plot last iteration of betahat for nonzero vs zero indexes, true beta overlaid
+# nonzero: boolean, if true plot only nonzero indexes (k indexes of the true k-sparse beta), otherwise plot zero indexes
+plot_betas = function(betahats, beta, nonzero_indexes, nonzero=T) {
+  n = nrow(betahats)
+  p = ncol(betahats)
+  dat = data.frame("p"=1:p, "bethat_n"=betahats[n, ], "beta"=beta)
+  if (nonzero) {
+    dat = dat[nonzero_indexes, ]
+    title = "Last iteration of bethat (orange) and true beta (black) at nonzero indexes"
+  } else {
+    dat = dat[-nonzero_indexes, ]
+    title = "Last iteration of bethat (orange) and true beta (black) at zero indexes"
+  }
+  ggplot(dat) + geom_point(aes(x=p, y=bethat_n), color="orange") +
+    geom_point(aes(x=p, y=beta), color="black", shape=4) +
+    xlab("p") +
+    ylab("") +
+    ggtitle(title)
+    
+}
+```
+
+
+```{r}
 # OGD
 betahats = my_OGD(X=X, Y=Y, lr=0.0000001, beta_0=rep(0, p))
-plot_prediction_error(betahats, beta, X, Y, title="Online gradient descent (OGD)", type="prediction")
-plot_prediction_error(betahats, beta, X, Y, title="Online gradient descent (OGD)", type="estimation")
+plot_prediction_error(betahats, beta, X, Y, title="Online gradient descent (OGD)", type="prediction") # prediction error
+plot_prediction_error(betahats, beta, X, Y, title="Online gradient descent (OGD)", type="estimation") # estimation error
+plot_betas(betahats, beta, nonzero_indexes, nonzero=T) # nonzero indexes
+plot_betas(betahats, beta, nonzero_indexes, nonzero=F) # zero indexes
 
 # Adagrad
 betahats = my_adagrad(X=X, Y=Y, lr=0.0000001, beta_0=rep(0, p), full=F)
 plot_prediction_error(betahats, beta, X, Y, title="Adaptive gradient descent (Adagrad)", type="prediction")
 plot_prediction_error(betahats, beta, X, Y, title="Adaptive gradient descent (Adagrad)", type="estimation")
+plot_betas(betahats, beta, nonzero_indexes, nonzero=T)
+plot_betas(betahats, beta, nonzero_indexes, nonzero=F)
 
 # Adam
 betahats = my_adam(X=X, Y=Y, lr=0.0000001, beta_0=rep(0, p), rho_1=0.9, rho_2=0.999, epsilon=1e-8)
 plot_prediction_error(betahats, beta, X, Y, title="Adaptive moment estimation (Adam)", type="prediction")
 plot_prediction_error(betahats, beta, X, Y, title="Adaptive moment estimation (Adam)", type="estimation")
+plot_betas(betahats, beta, nonzero_indexes, nonzero=T)
+plot_betas(betahats, beta, nonzero_indexes, nonzero=F)
 ```
 
 
+```{r}
+# plot betahats for each dimension, nonzero vs zero indexes
+```
 
 
 
