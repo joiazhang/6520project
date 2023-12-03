@@ -5,10 +5,12 @@ date: "Fall 2023"
 output: pdf_document
 ---
 ```{r}
+rm(list=ls())
 set.seed(6520)
 
 library(expm)
-# devtools::install()
+setwd("/Users/jwz34/Documents/Github/6520project/onlinegrad/R")
+devtools::install()
 library(onlinegrad)
 ```
 
@@ -92,17 +94,22 @@ plot_prediction_error = function(betahats, beta, X, Y, title, type) {
 ```{r}
 # OGD
 betahats = my_OGD(X=X, Y=Y, lr=0.0000001, beta_0=rep(0, p))
-plot_prediction_error(betahats=betahats, beta=beta, X=X, Y=Y, title="Online gradient descent (OGD)", type="prediction")
-plot_prediction_error(betahats=betahats, beta=beta, X=X, Y=Y, title="Online gradient descent (OGD)", type="estimation")
+plot_prediction_error(betahats, beta, X, Y, title="Online gradient descent (OGD)", type="prediction")
+plot_prediction_error(betahats, beta, X, Y, title="Online gradient descent (OGD)", type="estimation")
 
 # Adagrad
 betahats = my_adagrad(X=X, Y=Y, lr=0.0000001, beta_0=rep(0, p), full=F)
-plot_prediction_error(betahats, X, Y, title="Adaptive gradient descent (Adagrad)", type="prediction")
+plot_prediction_error(betahats, beta, X, Y, title="Adaptive gradient descent (Adagrad)", type="prediction")
+plot_prediction_error(betahats, beta, X, Y, title="Adaptive gradient descent (Adagrad)", type="estimation")
 
 # Adam
 betahats = my_adam(X=X, Y=Y, lr=0.0000001, beta_0=rep(0, p), rho_1=0.9, rho_2=0.999, epsilon=1e-8)
-plot_prediction_error(betahats, X, Y, title="Adaptive moment estimation (Adam)", type="prediction")
+plot_prediction_error(betahats, beta, X, Y, title="Adaptive moment estimation (Adam)", type="prediction")
+plot_prediction_error(betahats, beta, X, Y, title="Adaptive moment estimation (Adam)", type="estimation")
 ```
+
+
+
 
 
 
