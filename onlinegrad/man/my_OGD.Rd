@@ -4,7 +4,7 @@
 \alias{my_OGD}
 \title{OGD for regression}
 \usage{
-my_OGD(X, Y, lr, beta_0, regression)
+my_OGD(X, Y, lr, beta_0, regression = T)
 }
 \arguments{
 \item{X}{An n x p matrix of predictors where rows are observations and columns are predictors.}

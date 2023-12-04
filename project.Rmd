@@ -9,6 +9,8 @@ rm(list=ls())
 set.seed(6520)
 library(ggplot2)
 library(expm) # for sqrtm
+library(devtools)
+library(roxygen2)
 
 # run in console
 # setwd("/Users/jwz34/Documents/Github/6520project/onlinegrad")
@@ -202,41 +204,6 @@ ggplot(runtime_df, aes(x=n)) +
   ggtitle("Runtime for OGD (red), Adagrad (blue), Adam (black)")
 ```
 
-```{r}
-runtime_df = data.frame("n"=1:n)
-pred_df = data.frame("n"=1:n) # prediction error
-est_df = data.frame("n"=1:n) # estimation error
-
-# comparing full and diagonal Adagrad
-print("Diagonal")
-temp = my_adagrad(X=X, Y=Y, lr=0.0000001, beta_0=rep(0, p), full=F)
-betahats = temp[[1]]
-runtimes = temp[[2]]
-runtime_df$diag = runtimes
-
-pred_df$diag = plot_prediction_error(betahats, beta, X, Y, title="Adaptive gradient descent (Adagrad)", type="prediction")
-est_df$diag = plot_prediction_error(betahats, beta, X, Y, title="Adaptive gradient descent (Adagrad)", type="estimation")
-
-plot_betas(betahats, beta, nonzero_indexes, nonzero=T)
-plot_betas(betahats, beta, nonzero_indexes, nonzero=F)
-```
-
-
-```{r}
-# print("Full")
-# temp = my_adagrad(X=X, Y=Y, lr=0.0000001, beta_0=rep(0, p), full=T)
-# betahats = temp[[1]]
-# runtimes = temp[[2]]
-# runtime_df$full = runtimes
-# 
-# pred_df$full = plot_prediction_error(betahats, beta, X, Y, title="Adaptive gradient descent (Adagrad)", type="prediction")
-# est_df$full = plot_prediction_error(betahats, beta, X, Y, title="Adaptive gradient descent (Adagrad)", type="estimation")
-# 
-# plot_betas(betahats, beta, nonzero_indexes, nonzero=T)
-# plot_betas(betahats, beta, nonzero_indexes, nonzero=F)
-```
-
-
 # Classification
 
 ```{r}
@@ -271,19 +238,17 @@ est_df$adagrad = plot_prediction_error(betahats, beta, X, Y, title="Adaptive gra
 plot_betas(betahats, beta, nonzero_indexes, nonzero=T)
 plot_betas(betahats, beta, nonzero_indexes, nonzero=F)
 
-# # Adam
-# temp = my_adam(X=X, Y=Y, lr=0.0000001, beta_0=rep(0, p), rho_1=0.9, rho_2=0.999, epsilon=1e-8)
-# betahats = temp[[1]]
-# runtimes = temp[[2]]
-# runtime_df$adam = runtimes
-# 
-# pred_df$adam = plot_prediction_error(betahats, beta, X, Y, title="Adaptive moment estimation (Adam)", type="prediction")
-# est_df$adam = plot_prediction_error(betahats, beta, X, Y, title="Adaptive moment estimation (Adam)", type="estimation")
-# 
-# plot_betas(betahats, beta, nonzero_indexes, nonzero=T)
-# plot_betas(betahats, beta, nonzero_indexes, nonzero=F)
-# 
+# Adam
+temp = my_adam(X=X, Y=Y, lr=0.0000001, beta_0=rep(0, p), rho_1=0.9, rho_2=0.999, epsilon=1e-8, regression=F)
+betahats = temp[[1]]
+runtimes = temp[[2]]
+runtime_df$adam = runtimes
 
+pred_df$adam = plot_prediction_error(betahats, beta, X, Y, title="Adaptive moment estimation (Adam)", type="prediction")
+est_df$adam = plot_prediction_error(betahats, beta, X, Y, title="Adaptive moment estimation (Adam)", type="estimation")
+
+plot_betas(betahats, beta, nonzero_indexes, nonzero=T)
+plot_betas(betahats, beta, nonzero_indexes, nonzero=F)
 ```
 
 

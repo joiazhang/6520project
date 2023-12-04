@@ -4,7 +4,7 @@
 \alias{my_adam}
 \title{Adam for regression}
 \usage{
-my_adam(X, Y, lr, beta_0, rho_1, rho_2, epsilon, regression)
+my_adam(X, Y, lr, beta_0, rho_1, rho_2, epsilon, regression = T)
 }
 \arguments{
 \item{X}{An n x p matrix of predictors where rows are observations and columns are predictors.}

@@ -12,13 +12,14 @@
 #' my_OGD(X=X, Y=Y, lr=0.00001, beta_0=runif(ncol(X)))
 #' 
 #' @export
-my_OGD = function(X, Y, lr, beta_0, regression) {
+my_OGD = function(X, Y, lr, beta_0, regression=T) {
   n = nrow(X)
   p = ncol(X)
   betahats = matrix(nrow=n, ncol=p)
   betahats[1, ] = beta_0
   runtimes = rep(NA, n)
   runtimes[1] = 0
+  bs = rep(NA, n) # intercept b for n iterations
   if (regression) {
     for (t in 1:(n-1)) {
       start_time = Sys.time()
@@ -33,7 +34,6 @@ my_OGD = function(X, Y, lr, beta_0, regression) {
     } # end for
   } else {
     # classification
-    bs = rep(NA, n) # intercept b for n iterations
     bs[1] = 0
     for (t in 1:(n-1)) {
       start_time = Sys.time()

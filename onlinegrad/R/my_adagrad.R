@@ -13,7 +13,7 @@
 #' my_adagrad(X=X, Y=Y, lr=0.00001, beta_0=rep(0, ncol(X)), full=T)
 #' my_adagrad(X=X, Y=Y, lr=0.00001, beta_0=runif(ncol(X)), full=F)
 #' @export
-my_adagrad = function(X, Y, lr, beta_0, full, regression) {
+my_adagrad = function(X, Y, lr, beta_0, full, regression=T) {
   n = nrow(X)
   p = ncol(X)
   betahats = matrix(nrow=n, ncol=p)

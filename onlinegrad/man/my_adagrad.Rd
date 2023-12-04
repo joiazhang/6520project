@@ -4,7 +4,7 @@
 \alias{my_adagrad}
 \title{Adagrad for regression}
 \usage{
-my_adagrad(X, Y, lr, beta_0, full, regression)
+my_adagrad(X, Y, lr, beta_0, full, regression = T)
 }
 \arguments{
 \item{X}{An n x p matrix of predictors where rows are observations and columns are predictors.}

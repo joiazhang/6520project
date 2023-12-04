@@ -14,7 +14,7 @@
 #' my_adam(X=X, Y=Y, lr=0.0000001, beta_0=rep(0, p), rho_1=0.9, rho_2=0.999, epsilon=1e-8)
 #' 
 #' @export
-my_adam = function(X, Y, lr, beta_0, rho_1, rho_2, epsilon, regression) {
+my_adam = function(X, Y, lr, beta_0, rho_1, rho_2, epsilon, regression=T) {
   n = nrow(X)
   p = ncol(X)
   betahats = matrix(nrow=n, ncol=p)
@@ -30,22 +30,53 @@ my_adam = function(X, Y, lr, beta_0, rho_1, rho_2, epsilon, regression) {
   Ms[1, ] = rep(0, p)
   Rs[1, ] = rep(0, p)
   
-  for (t in 1:(n-1)) {
-    start_time = Sys.time()
-    x_t = as.matrix(X[t, ])
-    beta_t = as.matrix(betahats[t, ])
-    y_t_hat = t(beta_t)%*%x_t
-    Y_t = Y[t]
-    d_loss = 2*beta_t%*%t(x_t)%*%x_t - 2*x_t%*%Y_t
-    Ms[t+1, ] = rho_1*as.matrix(Ms[t, ]) + (1-rho_1)*d_loss
-    Rs[t+1, ] = rho_2*as.matrix(Rs[t, ]) + (1-rho_2)*d_loss^2
-    Mhats[t+1, ] = Ms[t, ] / (1-rho_1^t)
-    Rhats[t+1, ] = Rs[t, ] / (1-rho_2^t)
+  if (regression) {
+    for (t in 1:(n-1)) {
+      start_time = Sys.time()
+      
+      x_t = as.matrix(X[t, ])
+      beta_t = as.matrix(betahats[t, ])
+      y_t_hat = t(beta_t)%*%x_t
+      Y_t = Y[t]
+      d_loss = 2*beta_t%*%t(x_t)%*%x_t - 2*x_t%*%Y_t
+      Ms[t+1, ] = rho_1*as.matrix(Ms[t, ]) + (1-rho_1)*d_loss
+      Rs[t+1, ] = rho_2*as.matrix(Rs[t, ]) + (1-rho_2)*d_loss^2
+      Mhats[t+1, ] = Ms[t, ] / (1-rho_1^t)
+      Rhats[t+1, ] = Rs[t, ] / (1-rho_2^t)
+      
+      betahats[t+1, ] = beta_t - lr*(Mhats[t+1, ]/(sqrt(Rhats[t+1, ]+epsilon))) # update
+      
+      end_time = Sys.time()
+      runtimes[t+1] = runtimes[t] + (end_time - start_time)
+    } # end for
+  } else {
+    # classification
     
-    betahats[t+1, ] = beta_t - lr*(Mhats[t+1, ]/(sqrt(Rhats[t+1, ]+epsilon))) # update
-    end_time = Sys.time()
-    runtimes[t+1] = runtimes[t] + (end_time - start_time)
-  } # end for
+    for (t in 1:(n-1)) {
+      start_time = Sys.time()
+      
+      x_t = as.matrix(X[t, ])
+      beta_t = as.matrix(betahats[t, ])
+      y_t_hat = t(beta_t)%*%x_t
+      Y_t = Y[t]
+      
+      # predict y
+      Z = t(beta_t)%*%x_t # omit intercept bs
+      Y_pred = 1/(1+1/exp(Z))
+      
+      d_loss = (1/n)*as.numeric(Y_pred-Y_t)*x_t
+      
+      Ms[t+1, ] = rho_1*as.matrix(Ms[t, ]) + (1-rho_1)*d_loss
+      Rs[t+1, ] = rho_2*as.matrix(Rs[t, ]) + (1-rho_2)*d_loss^2
+      Mhats[t+1, ] = Ms[t, ] / (1-rho_1^t)
+      Rhats[t+1, ] = Rs[t, ] / (1-rho_2^t)
+      
+      betahats[t+1, ] = beta_t - lr*(Mhats[t+1, ]/(sqrt(Rhats[t+1, ]+epsilon))) # update
+      
+      end_time = Sys.time()
+      runtimes[t+1] = runtimes[t] + (end_time - start_time)
+    } # end for
+  } # end else
   return(list(betahats, runtimes))
 }
 
