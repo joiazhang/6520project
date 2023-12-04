@@ -4,6 +4,7 @@ author: "Minjia Jia and Joia Zhang"
 date: "Fall 2023"
 output: pdf_document
 ---
+
 ```{r}
 rm(list=ls())
 set.seed(6520)
@@ -19,51 +20,7 @@ library(onlinegrad)
 # .rs.restartR() # if ".rdb is corrupt"
 ```
 
-# Simulate data for regression and classification
-```{r}
-# simulate data: regression
-n = 100 # sample size
-p = 200 # number of predictors
-
-# beta
-k = round(0.05*p, 0) # number of nonzero coefficients
-sd_beta = 0.01
-nonzero_indexes = sample.int(n=p, size=k)
-beta = rep(0, p)
-beta[nonzero_indexes] = rnorm(n=k, mean=100, sd=sd_beta)
-sum(which(beta !=0) != sort(nonzero_indexes)) # test that we made the right indexes nonzero
-beta = as.matrix(beta)
-
-# x
-X = matrix(rnorm(n=n*p, mean=0, sd=5), nrow=n)
-
-# epsilon
-E = matrix(rnorm(n=n, mean=0, sd=1), nrow=n)
-
-# y
-
-Y = X%*%beta + E
-
-# note that in the online setting, each t^th row of X and Y is for time t
-```
-
-```{r}
-# simulate data: classification
-# X, beta same as above
-probs = 1/(1+exp(-X%*%beta))
-Y = rbinom(n=n, size=1, prob = probs) # Bernoulli
-```
-
-# Analysis of $\hat\beta$'s
-
-Plots
-+ Prediction error vs iterations
-+ Estimation error vs iterations
-+ Betahats for each dimension, nonzero vs zero indexes
-- Comparison of different dimensions
-- Run time of full vs diagonal Adagrad
-+ Run time of OGD, Adagrad, adam
-- Runtime vs prediction error
+# Plotting
 
 ```{r}
 # plot prediction or estimation error
@@ -134,6 +91,33 @@ plot_betas = function(betahats, beta, nonzero_indexes, nonzero=T) {
 }
 ```
 
+# Regression
+```{r}
+# simulate data: regression
+n = 100 # sample size
+p = 200 # number of predictors
+
+# beta
+k = round(0.05*p, 0) # number of nonzero coefficients
+sd_beta = 0.01
+nonzero_indexes = sample.int(n=p, size=k)
+beta = rep(0, p)
+beta[nonzero_indexes] = rnorm(n=k, mean=100, sd=sd_beta)
+sum(which(beta !=0) != sort(nonzero_indexes)) # test that we made the right indexes nonzero
+beta = as.matrix(beta)
+
+# x
+X = matrix(rnorm(n=n*p, mean=0, sd=5), nrow=n)
+
+# epsilon
+E = matrix(rnorm(n=n, mean=0, sd=1), nrow=n)
+
+# y
+
+Y = X%*%beta + E
+
+# note that in the online setting, each t^th row of X and Y is for time t
+```
 
 ```{r}
 runtime_df = data.frame("n"=1:n)
@@ -222,6 +206,13 @@ ggplot(conv_df) +
 ```
 
 # Classification
+
+```{r}
+# simulate data: classification
+# X, beta same as above
+probs = 1/(1+exp(-X%*%beta))
+Y = rbinom(n=n, size=1, prob = probs) # Bernoulli
+```
 
 ```{r}
 # logistic regression
