@@ -60,10 +60,10 @@ Plots
 + Prediction error vs iterations
 + Estimation error vs iterations
 + Betahats for each dimension, nonzero vs zero indexes
-- Comparison of different learning rates, dimensions
+- Comparison of different dimensions
 - Run time of full vs diagonal Adagrad
 + Run time of OGD, Adagrad, adam
-- Variance of betahats across iterations?
+- Runtime vs prediction error
 
 ```{r}
 # plot prediction or estimation error
@@ -202,6 +202,23 @@ ggplot(runtime_df, aes(x=n)) +
   xlab("Iteration") +
   ylab("") +
   ggtitle("Runtime for OGD (red), Adagrad (blue), Adam (black)")
+
+conv_df = data.frame("n"=1:n) # plot convergence
+conv_df$err_ogd = pred_df$ogd
+conv_df$err_adagrad = pred_df$adagrad
+conv_df$err_adam = pred_df$adam
+conv_df$time_ogd = runtime_df$ogd
+conv_df$time_adagrad = runtime_df$adagrad
+conv_df$time_adam = runtime_df$adam
+
+# plot convergence for ogd, adagrad, adam
+ggplot(conv_df) + 
+  geom_line(aes(x=time_ogd, y=err_ogd), color="red") +
+  geom_line(aes(x=time_adagrad, y=err_adagrad), color="blue") +
+  geom_line(aes(x=time_adam, y=err_adam), linetype="dashed") +
+  xlab("Runtime") +
+  ylab("Prediction error") +
+  ggtitle("Convergence for OGD (red), Adagrad (blue), Adam (black)")
 ```
 
 # Classification
@@ -244,12 +261,55 @@ betahats = temp[[1]]
 runtimes = temp[[2]]
 runtime_df$adam = runtimes
 
-pred_df$adam = plot_prediction_error(betahats, beta, X, Y, title="Adaptive moment estimation (Adam)", type="prediction")
+pred_df$adam = plot_prediction_error(betahats, beta, X, Y, title="Adaptive moment estimation (Adam)", type="prediction", regression=F, bs=rep(0, n))
 est_df$adam = plot_prediction_error(betahats, beta, X, Y, title="Adaptive moment estimation (Adam)", type="estimation")
 
 plot_betas(betahats, beta, nonzero_indexes, nonzero=T)
 plot_betas(betahats, beta, nonzero_indexes, nonzero=F)
+
+# plot prediction error for ogd, adagrad, adam
+ggplot(pred_df, aes(x=n)) + 
+  geom_line(aes(y=ogd), color="red") +
+  geom_line(aes(y=adagrad), color="blue") +
+  geom_line(aes(y=adam), linetype="dashed") +
+  xlab("Iteration") +
+  ylab("") +
+  ggtitle("Prediction error for OGD (red), Adagrad (blue), Adam (black)")
+
+# plot estimation error for ogd, adagrad, adam
+ggplot(est_df, aes(x=n)) + 
+  geom_line(aes(y=ogd), color="red") +
+  geom_line(aes(y=adagrad), color="blue") +
+  geom_line(aes(y=adam), linetype="dashed") +
+  xlab("Iteration") +
+  ylab("") +
+  ggtitle("Estimation error for OGD (red), Adagrad (blue), Adam (black)")
+
+# plot runtime for ogd, adagrad, adam
+ggplot(runtime_df, aes(x=n)) + 
+  geom_line(aes(y=ogd), color="red") +
+  geom_line(aes(y=adagrad), color="blue") +
+  geom_line(aes(y=adam), linetype="dashed") +
+  xlab("Iteration") +
+  ylab("") +
+  ggtitle("Runtime for OGD (red), Adagrad (blue), Adam (black)")
+
+conv_df = data.frame("n"=1:n) # plot convergence
+conv_df$err_ogd = pred_df$ogd
+conv_df$err_adagrad = pred_df$adagrad
+conv_df$err_adam = pred_df$adam
+conv_df$time_ogd = runtime_df$ogd
+conv_df$time_adagrad = runtime_df$adagrad
+conv_df$time_adam = runtime_df$adam
+
+# plot convergence for ogd, adagrad, adam
+ggplot(conv_df) + 
+  geom_line(aes(x=time_ogd, y=err_ogd), color="red") +
+  geom_line(aes(x=time_adagrad, y=err_adagrad), color="blue") +
+  geom_line(aes(x=time_adam, y=err_adam), linetype="dashed") +
+  xlab("Runtime") +
+  ylab("Prediction error") +
+  ggtitle("Convergence for OGD (red), Adagrad (blue), Adam (black)")
+  
 ```
-
-
 
