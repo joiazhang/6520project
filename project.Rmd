@@ -57,7 +57,7 @@ Plots
 + Prediction error vs iterations
 + Estimation error vs iterations
 + Betahats for each dimension, nonzero vs zero indexes
-- Comparison of different learning rates
+- Comparison of different learning rates, dimensions
 - Run time of full vs diagonal Adagrad
 + Run time of OGD, Adagrad, adam
 - Variance of betahats across iterations?
@@ -70,16 +70,31 @@ Plots
 # beta: true beta coefficient px1 vector
 # title: string for the title of the plot
 # type: "prediction" or "estimation" for prediction error or estimation error
-plot_prediction_error = function(betahats, beta, X, Y, title, type) {
+plot_prediction_error = function(betahats, beta, X, Y, title, type, regression=T, bs) {
   n = nrow(X)
   p = ncol(X)
   if ((type!="prediction") && (type!="estimation")) {
     stop("type parameter must be 'prediction' or 'estimation'")
   }
   if (type=="prediction") {
-    # prediction error
-    err = colSums((X%*%t(betahats) - matrix(rep(Y, n), nrow=n, ncol=n, byrow=F))^2) # row of the inside matrix is observation, column is iteration
-    ylab = "Prediction error"
+    if (regression) {
+      # prediction error
+      err = colSums((X%*%t(betahats) - matrix(rep(Y, n), nrow=n, ncol=n, byrow=F))^2) # row of the inside matrix is observation, column is iteration
+      ylab = "Prediction error"
+    } else {
+      # classification
+      
+      # predict y
+      Z = as.matrix(rowSums(betahats*X))+bs
+      Y_pred = 1/(1+1/exp(Z))
+      Yhat = rep(NA, n)
+      Yhat[Y_pred < 0.5] = 0
+      Yhat[Y_pred >= 0.5] = 1
+      
+      # predict y
+      err = cumsum(Yhat!=Y)/(1:n)
+      ylab = "Misclassification rate"
+    }
   } else {
     # estimation error
     beta = t(beta)
@@ -186,7 +201,6 @@ ggplot(runtime_df, aes(x=n)) +
   ggtitle("Runtime for OGD (red), Adagrad (blue), Adam (black)")
 ```
 
-
 ```{r}
 runtime_df = data.frame("n"=1:n)
 pred_df = data.frame("n"=1:n) # prediction error
@@ -208,21 +222,44 @@ plot_betas(betahats, beta, nonzero_indexes, nonzero=F)
 
 
 ```{r}
-print("Full")
-temp = my_adagrad(X=X, Y=Y, lr=0.0000001, beta_0=rep(0, p), full=T)
-betahats = temp[[1]]
-runtimes = temp[[2]]
-runtime_df$full = runtimes
-
-pred_df$full = plot_prediction_error(betahats, beta, X, Y, title="Adaptive gradient descent (Adagrad)", type="prediction")
-est_df$full = plot_prediction_error(betahats, beta, X, Y, title="Adaptive gradient descent (Adagrad)", type="estimation")
-
-plot_betas(betahats, beta, nonzero_indexes, nonzero=T)
-plot_betas(betahats, beta, nonzero_indexes, nonzero=F)
+# print("Full")
+# temp = my_adagrad(X=X, Y=Y, lr=0.0000001, beta_0=rep(0, p), full=T)
+# betahats = temp[[1]]
+# runtimes = temp[[2]]
+# runtime_df$full = runtimes
+# 
+# pred_df$full = plot_prediction_error(betahats, beta, X, Y, title="Adaptive gradient descent (Adagrad)", type="prediction")
+# est_df$full = plot_prediction_error(betahats, beta, X, Y, title="Adaptive gradient descent (Adagrad)", type="estimation")
+# 
+# plot_betas(betahats, beta, nonzero_indexes, nonzero=T)
+# plot_betas(betahats, beta, nonzero_indexes, nonzero=F)
 ```
 
 
+# Classification
 
+```{r}
+# logistic regression
+
+runtime_df = data.frame("n"=1:n)
+pred_df = data.frame("n"=1:n) # prediction error
+est_df = data.frame("n"=1:n) # estimation error
+
+# OGD
+temp = my_OGD(X=X, Y=Y, lr=0.0000001, beta_0=rep(0, p), regression=F)
+betahats = temp[[1]]
+runtimes = temp[[2]]
+bs = temp[[3]]
+runtime_df$ogd = runtimes
+
+pred_df$ogd = plot_prediction_error(betahats, beta, X, Y, title="Online gradient descent (OGD)", type="prediction", regression=F, bs=bs)
+est_df$ogd = plot_prediction_error(betahats, beta, X, Y, title="Online gradient descent (OGD)", type="estimation")
+
+plot_betas(betahats, beta, nonzero_indexes, nonzero=T) # nonzero indexes
+plot_betas(betahats, beta, nonzero_indexes, nonzero=F) # zero indexes
+
+
+```
 
 
 

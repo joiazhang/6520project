@@ -4,7 +4,7 @@
 \alias{my_OGD}
 \title{OGD for regression}
 \usage{
-my_OGD(X, Y, lr, beta_0)
+my_OGD(X, Y, lr, beta_0, regression = T)
 }
 \arguments{
 \item{X}{An n x p matrix of predictors where rows are observations and columns are predictors.}
@@ -14,6 +14,8 @@ my_OGD(X, Y, lr, beta_0)
 \item{lr}{A constant that is the learning rate.}
 
 \item{beta_0}{An p x 1 vector that is the initialization for the coefficients.}
+
+\item{regression}{Boolean, regression if true, else classification}
 }
 \value{
 List where first elemnt is an n x p matrix where each ith row is the coefficients for the ith iteration and the columns are predictors and second element is a nx1 vector of runtimes for each iteration.
