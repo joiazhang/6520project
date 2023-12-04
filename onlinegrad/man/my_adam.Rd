@@ -4,7 +4,7 @@
 \alias{my_adam}
 \title{Adam for regression}
 \usage{
-my_adam(X, Y, lr, beta_0, rho_1, rho_2, epsilon)
+my_adam(X, Y, lr, beta_0, rho_1, rho_2, epsilon, regression)
 }
 \arguments{
 \item{X}{An n x p matrix of predictors where rows are observations and columns are predictors.}
@@ -20,6 +20,8 @@ my_adam(X, Y, lr, beta_0, rho_1, rho_2, epsilon)
 \item{rho_2}{constant for 2nd moment decay rate}
 
 \item{epsilon}{positive constant for nonzero/invertibility}
+
+\item{regression}{Boolean, regression if true, else classification.}
 }
 \value{
 List where first elemnt is an n x p matrix where each ith row is the coefficients for the ith iteration and the columns are predictors and second element is a nx1 vector of runtimes for each iteration.

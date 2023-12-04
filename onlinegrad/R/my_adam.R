@@ -8,12 +8,13 @@
 #' @param rho_1 constant for 1st moment decay rate
 #' @param rho_2 constant for 2nd moment decay rate
 #' @param epsilon positive constant for nonzero/invertibility
+#' @param regression Boolean, regression if true, else classification.
 #' @return List where first elemnt is an n x p matrix where each ith row is the coefficients for the ith iteration and the columns are predictors and second element is a nx1 vector of runtimes for each iteration.
 #' @examples
 #' my_adam(X=X, Y=Y, lr=0.0000001, beta_0=rep(0, p), rho_1=0.9, rho_2=0.999, epsilon=1e-8)
 #' 
 #' @export
-my_adam = function(X, Y, lr, beta_0, rho_1, rho_2, epsilon) {
+my_adam = function(X, Y, lr, beta_0, rho_1, rho_2, epsilon, regression) {
   n = nrow(X)
   p = ncol(X)
   betahats = matrix(nrow=n, ncol=p)
