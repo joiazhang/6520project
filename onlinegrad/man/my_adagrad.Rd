@@ -4,7 +4,14 @@
 \alias{my_adagrad}
 \title{Adagrad for regression}
 \usage{
-my_adagrad(X, Y, lr, beta_0, full, regression = T)
+my_adagrad(
+  X,
+  Y,
+  lr = 1e-04,
+  beta_0 = rep(0, ncol(X)),
+  full = F,
+  regression = T
+)
 }
 \arguments{
 \item{X}{An n x p matrix of predictors where rows are observations and columns are predictors.}
@@ -24,8 +31,4 @@ List where first elemnt is an n x p matrix where each ith row is the coefficient
 }
 \description{
 Adagrad for regression
-}
-\examples{
-my_adagrad(X=X, Y=Y, lr=0.00001, beta_0=rep(0, ncol(X)), full=T)
-my_adagrad(X=X, Y=Y, lr=0.00001, beta_0=runif(ncol(X)), full=F)
 }

@@ -7,12 +7,9 @@
 #' @param beta_0 An p x 1 vector that is the initialization for the coefficients.
 #' @param regression Boolean, regression if true, else classification.
 #' @return List where first elemnt is an n x p matrix where each ith row is the coefficients for the ith iteration and the columns are predictors and second element is a nx1 vector of runtimes for each iteration.
-#' @examples
-#' my_OGD(X=X, Y=Y, lr=0.00001, beta_0=rep(0, ncol(X)))
-#' my_OGD(X=X, Y=Y, lr=0.00001, beta_0=runif(ncol(X)))
 #' 
 #' @export
-my_OGD = function(X, Y, lr, beta_0, regression=T) {
+my_OGD = function(X, Y, lr=1e-4, beta_0=rep(0, ncol(X)), regression=T) {
   n = nrow(X)
   p = ncol(X)
   betahats = matrix(nrow=n, ncol=p)

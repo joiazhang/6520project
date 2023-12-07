@@ -4,7 +4,16 @@
 \alias{my_adam}
 \title{Adam for regression}
 \usage{
-my_adam(X, Y, lr, beta_0, rho_1, rho_2, epsilon, regression = T)
+my_adam(
+  X,
+  Y,
+  lr = 1e-04,
+  beta_0 = rep(0, ncol(X)),
+  rho_1 = 0.9,
+  rho_2 = 0.999,
+  epsilon = 1e-08,
+  regression = T
+)
 }
 \arguments{
 \item{X}{An n x p matrix of predictors where rows are observations and columns are predictors.}
@@ -28,8 +37,4 @@ List where first elemnt is an n x p matrix where each ith row is the coefficient
 }
 \description{
 Adaptive moment estimation for linear regression.
-}
-\examples{
-my_adam(X=X, Y=Y, lr=0.0000001, beta_0=rep(0, p), rho_1=0.9, rho_2=0.999, epsilon=1e-8)
-
 }

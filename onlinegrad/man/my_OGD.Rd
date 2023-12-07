@@ -4,7 +4,7 @@
 \alias{my_OGD}
 \title{OGD for regression}
 \usage{
-my_OGD(X, Y, lr, beta_0, regression = T)
+my_OGD(X, Y, lr = 1e-04, beta_0 = rep(0, ncol(X)), regression = T)
 }
 \arguments{
 \item{X}{An n x p matrix of predictors where rows are observations and columns are predictors.}
@@ -22,9 +22,4 @@ List where first elemnt is an n x p matrix where each ith row is the coefficient
 }
 \description{
 Online gradient descent for linear regression.
-}
-\examples{
-my_OGD(X=X, Y=Y, lr=0.00001, beta_0=rep(0, ncol(X)))
-my_OGD(X=X, Y=Y, lr=0.00001, beta_0=runif(ncol(X)))
-
 }

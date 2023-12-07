@@ -23,6 +23,8 @@ library(roxygen2)
 ```{r}
 # hyperparamters
 lr = 1e-4 # learning rate
+beta_0 = rep(0, ncol(X)) # weight initialization
+# beta_0 = runif(ncol(X))
 
 # data dimensions
 n = 100 # sample size
