@@ -5,6 +5,7 @@ date: "Fall 2023"
 output: pdf_document
 ---
 
+# Set up
 ```{r}
 rm(list=ls())
 set.seed(6520)
@@ -13,12 +14,21 @@ library(expm) # for sqrtm
 library(devtools)
 library(roxygen2)
 
-# run in console
+# === run in console ===
 # setwd("/Users/jwz34/Documents/Github/6520project/onlinegrad")
 # devtools::install()
-library(onlinegrad)
-# .rs.restartR() # if ".rdb is corrupt"
+# library(onlinegrad)
 ```
+
+```{r}
+# hyperparamters
+lr = 1e-4 # learning rate
+
+# data dimensions
+n = 100 # sample size
+p = 200 # number of predictors
+```
+
 
 # Plotting
 
@@ -92,10 +102,11 @@ plot_betas = function(betahats, beta, nonzero_indexes, nonzero=T) {
 ```
 
 # Regression
+
+## Generate data for linear regression
+
 ```{r}
 # simulate data: regression
-n = 100 # sample size
-p = 200 # number of predictors
 
 # beta
 k = round(0.05*p, 0) # number of nonzero coefficients
@@ -119,13 +130,15 @@ Y = X%*%beta + E
 # note that in the online setting, each t^th row of X and Y is for time t
 ```
 
+## OGD: regression
+
 ```{r}
 runtime_df = data.frame("n"=1:n)
 pred_df = data.frame("n"=1:n) # prediction error
 est_df = data.frame("n"=1:n) # estimation error
 
 # OGD
-temp = my_OGD(X=X, Y=Y, lr=0.0000001, beta_0=rep(0, p))
+temp = my_OGD(X=X, Y=Y, lr=lr, beta_0=rep(0, p))
 betahats = temp[[1]]
 runtimes = temp[[2]]
 runtime_df$ogd = runtimes
@@ -135,9 +148,14 @@ est_df$ogd = plot_prediction_error(betahats, beta, X, Y, title="Online gradient 
 
 plot_betas(betahats, beta, nonzero_indexes, nonzero=T) # nonzero indexes
 plot_betas(betahats, beta, nonzero_indexes, nonzero=F) # zero indexes
+```
 
+
+## Adagrad: regression
+
+```{r}
 # Adagrad
-temp = my_adagrad(X=X, Y=Y, lr=0.0000001, beta_0=rep(0, p), full=F)
+temp = my_adagrad(X=X, Y=Y, lr=lr, beta_0=rep(0, p), full=F)
 betahats = temp[[1]]
 runtimes = temp[[2]]
 runtime_df$adagrad = runtimes
@@ -147,9 +165,13 @@ est_df$adagrad = plot_prediction_error(betahats, beta, X, Y, title="Adaptive gra
 
 plot_betas(betahats, beta, nonzero_indexes, nonzero=T)
 plot_betas(betahats, beta, nonzero_indexes, nonzero=F)
+```
 
+## Adam: regression
+
+```{r}
 # Adam
-temp = my_adam(X=X, Y=Y, lr=0.0000001, beta_0=rep(0, p), rho_1=0.9, rho_2=0.999, epsilon=1e-8)
+temp = my_adam(X=X, Y=Y, lr=lr, beta_0=rep(0, p), rho_1=0.9, rho_2=0.999, epsilon=1e-8)
 betahats = temp[[1]]
 runtimes = temp[[2]]
 runtime_df$adam = runtimes
@@ -159,7 +181,11 @@ est_df$adam = plot_prediction_error(betahats, beta, X, Y, title="Adaptive moment
 
 plot_betas(betahats, beta, nonzero_indexes, nonzero=T)
 plot_betas(betahats, beta, nonzero_indexes, nonzero=F)
+```
 
+## Performance comparison: regression
+
+```{r}
 # plot prediction error for ogd, adagrad, adam
 ggplot(pred_df, aes(x=n)) + 
   geom_line(aes(y=ogd), color="red") +
@@ -207,6 +233,8 @@ ggplot(conv_df) +
 
 # Classification
 
+## Generate data for logistic regression
+
 ```{r}
 # simulate data: classification
 # X, beta same as above
@@ -214,15 +242,15 @@ probs = 1/(1+exp(-X%*%beta))
 Y = rbinom(n=n, size=1, prob = probs) # Bernoulli
 ```
 
-```{r}
-# logistic regression
+## OGD: classification
 
+```{r}
 runtime_df = data.frame("n"=1:n)
 pred_df = data.frame("n"=1:n) # prediction error
 est_df = data.frame("n"=1:n) # estimation error
 
 # OGD
-temp = my_OGD(X=X, Y=Y, lr=0.0000001, beta_0=rep(0, p), regression=F)
+temp = my_OGD(X=X, Y=Y, lr=lr, beta_0=rep(0, p), regression=F)
 betahats = temp[[1]]
 runtimes = temp[[2]]
 bs = temp[[3]]
@@ -233,9 +261,13 @@ est_df$ogd = plot_prediction_error(betahats, beta, X, Y, title="Online gradient 
 
 plot_betas(betahats, beta, nonzero_indexes, nonzero=T) # nonzero indexes
 plot_betas(betahats, beta, nonzero_indexes, nonzero=F) # zero indexes
+```
 
+## Adagrad: classification
+
+```{r}
 # Adagrad
-temp = my_adagrad(X=X, Y=Y, lr=0.0000001, beta_0=rep(0, p), full=F, regression=F)
+temp = my_adagrad(X=X, Y=Y, lr=lr, beta_0=rep(0, p), full=F, regression=F)
 betahats = temp[[1]]
 runtimes = temp[[2]]
 runtime_df$adagrad = runtimes
@@ -245,9 +277,12 @@ est_df$adagrad = plot_prediction_error(betahats, beta, X, Y, title="Adaptive gra
 
 plot_betas(betahats, beta, nonzero_indexes, nonzero=T)
 plot_betas(betahats, beta, nonzero_indexes, nonzero=F)
+```
 
+## Adam: classification
+```{r}
 # Adam
-temp = my_adam(X=X, Y=Y, lr=0.0000001, beta_0=rep(0, p), rho_1=0.9, rho_2=0.999, epsilon=1e-8, regression=F)
+temp = my_adam(X=X, Y=Y, lr=lr, beta_0=rep(0, p), rho_1=0.9, rho_2=0.999, epsilon=1e-8, regression=F)
 betahats = temp[[1]]
 runtimes = temp[[2]]
 runtime_df$adam = runtimes
@@ -257,7 +292,10 @@ est_df$adam = plot_prediction_error(betahats, beta, X, Y, title="Adaptive moment
 
 plot_betas(betahats, beta, nonzero_indexes, nonzero=T)
 plot_betas(betahats, beta, nonzero_indexes, nonzero=F)
+```
 
+## Performance comparison: classification
+```{r}
 # plot prediction error for ogd, adagrad, adam
 ggplot(pred_df, aes(x=n)) + 
   geom_line(aes(y=ogd), color="red") +
@@ -282,7 +320,7 @@ ggplot(runtime_df, aes(x=n)) +
   geom_line(aes(y=adagrad), color="blue") +
   geom_line(aes(y=adam), linetype="dashed") +
   xlab("Iteration") +
-  ylab("") +
+  ylab("(s)") +
   ggtitle("Runtime for OGD (red), Adagrad (blue), Adam (black)")
 
 conv_df = data.frame("n"=1:n) # plot convergence
@@ -298,7 +336,7 @@ ggplot(conv_df) +
   geom_line(aes(x=time_ogd, y=err_ogd), color="red") +
   geom_line(aes(x=time_adagrad, y=err_adagrad), color="blue") +
   geom_line(aes(x=time_adam, y=err_adam), linetype="dashed") +
-  xlab("Runtime") +
+  xlab("Runtime (s)") +
   ylab("Prediction error") +
   ggtitle("Convergence for OGD (red), Adagrad (blue), Adam (black)")
   
