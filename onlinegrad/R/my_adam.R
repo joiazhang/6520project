@@ -13,6 +13,7 @@
 #' 
 #' @export
 my_adam = function(X, Y, lr=1e-4, beta_0=rep(0, ncol(X)), rho_1=0.9, rho_2=0.999, epsilon=1e-8, regression=T) {
+  # initialize variables
   n = nrow(X)
   p = ncol(X)
   betahats = matrix(nrow=n, ncol=p)
@@ -22,8 +23,6 @@ my_adam = function(X, Y, lr=1e-4, beta_0=rep(0, ncol(X)), rho_1=0.9, rho_2=0.999
   Rhats = matrix(nrow=n, ncol=p) # 2nd moment bias correction
   runtimes = rep(NA, n)
   runtimes[1] = 0
-  
-  # initialize
   betahats[1, ] = beta_0
   Ms[1, ] = rep(0, p)
   Rs[1, ] = rep(0, p)
@@ -32,6 +31,7 @@ my_adam = function(X, Y, lr=1e-4, beta_0=rep(0, ncol(X)), rho_1=0.9, rho_2=0.999
     for (t in 1:(n-1)) {
       start_time = Sys.time()
       
+      # define values for update step
       x_t = as.matrix(X[t, ])
       beta_t = as.matrix(betahats[t, ])
       y_t_hat = t(beta_t)%*%x_t
@@ -42,7 +42,7 @@ my_adam = function(X, Y, lr=1e-4, beta_0=rep(0, ncol(X)), rho_1=0.9, rho_2=0.999
       Mhats[t+1, ] = Ms[t, ] / (1-rho_1^t)
       Rhats[t+1, ] = Rs[t, ] / (1-rho_2^t)
       
-      betahats[t+1, ] = beta_t - lr*(Mhats[t+1, ]/(sqrt(Rhats[t+1, ]+epsilon))) # update
+      betahats[t+1, ] = beta_t - lr*(Mhats[t+1, ]/(sqrt(Rhats[t+1, ]+epsilon))) # update step
       
       end_time = Sys.time()
       runtimes[t+1] = runtimes[t] + (end_time - start_time)
@@ -53,23 +53,20 @@ my_adam = function(X, Y, lr=1e-4, beta_0=rep(0, ncol(X)), rho_1=0.9, rho_2=0.999
     for (t in 1:(n-1)) {
       start_time = Sys.time()
       
+      # define values for update step
       x_t = as.matrix(X[t, ])
       beta_t = as.matrix(betahats[t, ])
       y_t_hat = t(beta_t)%*%x_t
       Y_t = Y[t]
-      
-      # predict y
-      Z = t(beta_t)%*%x_t # omit intercept bs
-      Y_pred = 1/(1+1/exp(Z))
-      
+      Z = t(beta_t)%*%x_t # sigmoid function (omitted intercept bs)
+      Y_pred = 1/(1+1/exp(Z)) # predict y
       d_loss = (1/n)*as.numeric(Y_pred-Y_t)*x_t
-      
       Ms[t+1, ] = rho_1*as.matrix(Ms[t, ]) + (1-rho_1)*d_loss
       Rs[t+1, ] = rho_2*as.matrix(Rs[t, ]) + (1-rho_2)*d_loss^2
       Mhats[t+1, ] = Ms[t, ] / (1-rho_1^t)
       Rhats[t+1, ] = Rs[t, ] / (1-rho_2^t)
       
-      betahats[t+1, ] = beta_t - lr*(Mhats[t+1, ]/(sqrt(Rhats[t+1, ]+epsilon))) # update
+      betahats[t+1, ] = beta_t - lr*(Mhats[t+1, ]/(sqrt(Rhats[t+1, ]+epsilon))) # update step
       
       end_time = Sys.time()
       runtimes[t+1] = runtimes[t] + (end_time - start_time)

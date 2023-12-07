@@ -10,6 +10,7 @@
 #' 
 #' @export
 my_adagrad = function(X, Y, lr=1e-4, beta_0=rep(0, ncol(X)), regression=T) {
+  # initialize variables
   n = nrow(X)
   p = ncol(X)
   betahats = matrix(nrow=n, ncol=p)
@@ -22,6 +23,8 @@ my_adagrad = function(X, Y, lr=1e-4, beta_0=rep(0, ncol(X)), regression=T) {
   if (regression) {
     for (t in 1:(n-1)) {
       start_time = Sys.time()
+      
+      # define values for update step
       x_t = as.matrix(X[t, ])
       beta_t = as.matrix(betahats[t, ])
       y_t_hat = t(beta_t)%*%x_t
@@ -31,8 +34,7 @@ my_adagrad = function(X, Y, lr=1e-4, beta_0=rep(0, ncol(X)), regression=T) {
       G_t = G_t + g_t%*%t(g_t)
       diag_G_t = diag(diag(G_t), nrow=p, ncol=p)
       
-      
-      betahats[t+1, ] = beta_t - lr*as.matrix(diag(diag(diag_G_t^(-1/2)), nrow=p, ncol=p))%*%g_t # diagonal
+      betahats[t+1, ] = beta_t - lr*as.matrix(diag(diag(diag_G_t^(-1/2)), nrow=p, ncol=p))%*%g_t # update step (diagonal)
       
       end_time = Sys.time()
       runtimes[t+1] = runtimes[t] + (end_time - start_time)
@@ -43,21 +45,19 @@ my_adagrad = function(X, Y, lr=1e-4, beta_0=rep(0, ncol(X)), regression=T) {
     for (t in 1:(n-1)) {
       start_time = Sys.time()
       
+      # define values for update step
       x_t = as.matrix(X[t, ])
       beta_t = as.matrix(betahats[t, ])
       y_t_hat = t(beta_t)%*%x_t
       Y_t = Y[t]
-      
-      # predict y
-      Z = t(beta_t)%*%x_t # omit intercept bs
-      Y_pred = 1/(1+1/exp(Z))
-      
+      Z = t(beta_t)%*%x_t # sigmoid function (omitted intercept bs)
+      Y_pred = 1/(1+1/exp(Z)) # predict y
       g_vec[t, ] = (1/n)*as.numeric(Y_pred-Y_t)*x_t
       g_t = as.matrix(g_vec[t, ])
       G_t = G_t + g_t%*%t(g_t)
       diag_G_t = diag(diag(G_t), nrow=p, ncol=p)
       
-      betahats[t+1, ] = beta_t - lr*as.matrix(diag(diag(diag_G_t^(-1/2)), nrow=p, ncol=p))%*%g_t # diagonal update step
+      betahats[t+1, ] = beta_t - lr*as.matrix(diag(diag(diag_G_t^(-1/2)), nrow=p, ncol=p))%*%g_t # update step (diaogonal)
       
       end_time = Sys.time()
       runtimes[t+1] = runtimes[t] + (end_time - start_time)

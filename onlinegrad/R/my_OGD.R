@@ -10,6 +10,7 @@
 #' 
 #' @export
 my_OGD = function(X, Y, lr=1e-4, beta_0=rep(0, ncol(X)), regression=T) {
+  # initialize variables
   n = nrow(X)
   p = ncol(X)
   betahats = matrix(nrow=n, ncol=p)
@@ -17,15 +18,20 @@ my_OGD = function(X, Y, lr=1e-4, beta_0=rep(0, ncol(X)), regression=T) {
   runtimes = rep(NA, n)
   runtimes[1] = 0
   bs = rep(NA, n) # intercept b for n iterations
+  
   if (regression) {
     for (t in 1:(n-1)) {
       start_time = Sys.time()
+      
+      # define values for update step
       x_t = as.matrix(X[t, ])
       beta_t = as.matrix(betahats[t, ])
       y_t_hat = t(beta_t)%*%x_t
       Y_t = Y[t]
       d_loss = 2*beta_t%*%t(x_t)%*%x_t - 2*x_t%*%Y_t
-      betahats[t+1, ] = beta_t - lr*d_loss
+      
+      betahats[t+1, ] = beta_t - lr*d_loss # update step
+      
       end_time = Sys.time()
       runtimes[t+1] = runtimes[t] + (end_time - start_time)
     } # end for
@@ -35,21 +41,17 @@ my_OGD = function(X, Y, lr=1e-4, beta_0=rep(0, ncol(X)), regression=T) {
     for (t in 1:(n-1)) {
       start_time = Sys.time()
       
+      # define values for update step
       x_t = as.matrix(X[t, ])
       beta_t = as.matrix(betahats[t, ])
       Y_t = Y[t]
-      
-      # predict y
-      Z = t(beta_t)%*%x_t+bs[t]
-      Y_pred = 1/(1+1/exp(Z))
-      
-      # calculate gradient
+      Z = t(beta_t)%*%x_t+bs[t] # sigmoid function
+      Y_pred = 1/(1+1/exp(Z)) # predict y
       d_w = (1/n)*as.numeric(Y_pred-Y_t)*x_t
       d_b = (1/n)*sum(Y_pred-Y_t)
       
-      # update coefficients and intercept
-      betahats[t+1, ] = beta_t - lr*d_w
-      bs[t+1] = bs[t] - lr*d_b
+      betahats[t+1, ] = beta_t - lr*d_w # update step, coefficients
+      bs[t+1] = bs[t] - lr*d_b # update step, intercept
       
       end_time = Sys.time()
       runtimes[t+1] = runtimes[t] + (end_time - start_time)
