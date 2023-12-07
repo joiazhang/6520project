@@ -5,12 +5,15 @@ date: "Fall 2023"
 output: pdf_document
 ---
 
+TODO: Run with smaller learning rate
+Run with different beta_0
+Put graphs in final report
+
 # Set up
 ```{r}
 rm(list=ls())
 set.seed(6520)
 library(ggplot2)
-library(expm) # for sqrtm
 library(devtools)
 library(roxygen2)
 
