@@ -14,24 +14,20 @@ library(expm) # for sqrtm
 library(devtools)
 library(roxygen2)
 
-# === run in console ===
-# setwd("/Users/jwz34/Documents/Github/6520project/onlinegrad")
-# devtools::install()
-# library(onlinegrad)
-
-# load our package onlinegrad
-# TODO
+# load our package onlinegrad from Github
+# install_github("joiazhang/6520project", subdir="onlinegrad") # only need to run once for installation
+library(onlinegrad)
 ```
 
 ```{r}
-# hyperparamters
-lr = 1e-4 # learning rate
-beta_0 = rep(0, ncol(X)) # weight initialization
-# beta_0 = runif(ncol(X))
-
 # data dimensions
 n = 100 # sample size
 p = 200 # number of predictors
+
+# hyperparamters
+lr = 1e-4 # learning rate
+beta_0 = rep(0, p) # weight initialization
+# beta_0 = runif(p)
 ```
 
 # Plotting
@@ -165,7 +161,7 @@ plot_betas(betahats, beta, nonzero_indexes, nonzero=F) # zero indexes
 
 ```{r}
 # Adagrad
-temp = my_adagrad(X=X, Y=Y, lr=lr, beta_0=rep(0, p), full=F)
+temp = my_adagrad(X=X, Y=Y, lr=lr, beta_0=rep(0, p))
 betahats = temp[[1]]
 runtimes = temp[[2]]
 runtime_df$adagrad = runtimes
@@ -277,7 +273,7 @@ plot_betas(betahats, beta, nonzero_indexes, nonzero=F) # zero indexes
 
 ```{r}
 # Adagrad
-temp = my_adagrad(X=X, Y=Y, lr=lr, beta_0=rep(0, p), full=F, regression=F)
+temp = my_adagrad(X=X, Y=Y, lr=lr, beta_0=rep(0, p), regression=F)
 betahats = temp[[1]]
 runtimes = temp[[2]]
 runtime_df$adagrad = runtimes
