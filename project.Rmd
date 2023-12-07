@@ -18,6 +18,9 @@ library(roxygen2)
 # setwd("/Users/jwz34/Documents/Github/6520project/onlinegrad")
 # devtools::install()
 # library(onlinegrad)
+
+# load our package onlinegrad
+# TODO
 ```
 
 ```{r}

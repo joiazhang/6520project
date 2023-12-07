@@ -24,11 +24,11 @@ my_adam(
 
 \item{beta_0}{An p x 1 vector that is the initialization for the coefficients.}
 
-\item{rho_1}{constant for 1st moment decay rate}
+\item{rho_1}{constant for 1st moment decay rate.}
 
-\item{rho_2}{constant for 2nd moment decay rate}
+\item{rho_2}{constant for 2nd moment decay rate.}
 
-\item{epsilon}{positive constant for nonzero/invertibility}
+\item{epsilon}{positive constant for nonzero/invertibility.}
 
 \item{regression}{Boolean, regression if true, else classification.}
 }

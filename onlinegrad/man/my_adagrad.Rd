@@ -2,16 +2,9 @@
 % Please edit documentation in R/my_adagrad.R
 \name{my_adagrad}
 \alias{my_adagrad}
-\title{Adagrad for regression}
+\title{Adagrad (diagonal) for regression}
 \usage{
-my_adagrad(
-  X,
-  Y,
-  lr = 1e-04,
-  beta_0 = rep(0, ncol(X)),
-  full = F,
-  regression = T
-)
+my_adagrad(X, Y, lr = 1e-04, beta_0 = rep(0, ncol(X)), regression = T)
 }
 \arguments{
 \item{X}{An n x p matrix of predictors where rows are observations and columns are predictors.}
@@ -22,13 +15,11 @@ my_adagrad(
 
 \item{beta_0}{An p x 1 vector that is the initialization for the coefficients.}
 
-\item{full}{Boolean, if true uses the full G matrix for the update step, otherwise uses only the diagonal elements of G.}
-
 \item{regression}{Boolean, regression if true, else classification.}
 }
 \value{
 List where first elemnt is an n x p matrix where each ith row is the coefficients for the ith iteration and the columns are predictors and second element is a nx1 vector of runtimes for each iteration.
 }
 \description{
-Adagrad for regression
+Adaptive gradient descent for linear regression.
 }
