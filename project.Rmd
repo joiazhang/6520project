@@ -24,8 +24,8 @@ library(onlinegrad)
 
 ```{r}
 # data dimensions
-n = 100 # sample size
-p = 200 # number of predictors
+n = 1000 # sample size
+p = 2000 # number of predictors
 
 # hyperparamters
 lr = 1e-4 # learning rate
@@ -204,6 +204,8 @@ ggplot(pred_df, aes(x=n)) +
   ylab("") +
   ggtitle("Prediction error for OGD (red), Adagrad (blue), Adam (black)")
 
+ggsave(filename="regression_pred_err.png", path="/Users/jwz34/Desktop/STSCI_6520/Project/Plots/lr_1e-4_zeroinit_n1000_p2000")
+
 # plot estimation error for ogd, adagrad, adam
 ggplot(est_df, aes(x=n)) + 
   geom_line(aes(y=ogd), color="red") +
@@ -213,6 +215,8 @@ ggplot(est_df, aes(x=n)) +
   ylab("") +
   ggtitle("Estimation error for OGD (red), Adagrad (blue), Adam (black)")
 
+ggsave(filename="regression_est_err.png", path="/Users/jwz34/Desktop/STSCI_6520/Project/Plots/lr_1e-4_zeroinit_n1000_p2000")
+
 # plot runtime for ogd, adagrad, adam
 ggplot(runtime_df, aes(x=n)) + 
   geom_line(aes(y=ogd), color="red") +
@@ -221,6 +225,8 @@ ggplot(runtime_df, aes(x=n)) +
   xlab("Iteration") +
   ylab("") +
   ggtitle("Runtime for OGD (red), Adagrad (blue), Adam (black)")
+
+ggsave(filename="regression_runtime.png", path="/Users/jwz34/Desktop/STSCI_6520/Project/Plots/lr_1e-4_zeroinit_n1000_p2000")
 
 conv_df = data.frame("n"=1:n) # plot convergence
 conv_df$err_ogd = pred_df$ogd
@@ -238,6 +244,8 @@ ggplot(conv_df) +
   xlab("Runtime") +
   ylab("Prediction error") +
   ggtitle("Convergence for OGD (red), Adagrad (blue), Adam (black)")
+
+ggsave(filename="regression_convergence.png", path="/Users/jwz34/Desktop/STSCI_6520/Project/Plots/lr_1e-4_zeroinit_n1000_p2000")
 ```
 
 # Classification
@@ -314,6 +322,8 @@ ggplot(pred_df, aes(x=n)) +
   ylab("") +
   ggtitle("Prediction error for OGD (red), Adagrad (blue), Adam (black)")
 
+ggsave(filename="classification_pred_err.png", path="/Users/jwz34/Desktop/STSCI_6520/Project/Plots/lr_1e-4_zeroinit_n1000_p2000")
+
 # plot estimation error for ogd, adagrad, adam
 ggplot(est_df, aes(x=n)) + 
   geom_line(aes(y=ogd), color="red") +
@@ -323,6 +333,8 @@ ggplot(est_df, aes(x=n)) +
   ylab("") +
   ggtitle("Estimation error for OGD (red), Adagrad (blue), Adam (black)")
 
+ggsave(filename="classification_est_err.png", path="/Users/jwz34/Desktop/STSCI_6520/Project/Plots/lr_1e-4_zeroinit_n1000_p2000")
+
 # plot runtime for ogd, adagrad, adam
 ggplot(runtime_df, aes(x=n)) + 
   geom_line(aes(y=ogd), color="red") +
@@ -331,6 +343,8 @@ ggplot(runtime_df, aes(x=n)) +
   xlab("Iteration") +
   ylab("(s)") +
   ggtitle("Runtime for OGD (red), Adagrad (blue), Adam (black)")
+
+ggsave(filename="classification_runtime.png", path="/Users/jwz34/Desktop/STSCI_6520/Project/Plots/lr_1e-4_zeroinit_n1000_p2000")
 
 conv_df = data.frame("n"=1:n) # plot convergence
 conv_df$err_ogd = pred_df$ogd
@@ -348,6 +362,8 @@ ggplot(conv_df) +
   xlab("Runtime (s)") +
   ylab("Prediction error") +
   ggtitle("Convergence for OGD (red), Adagrad (blue), Adam (black)")
+
+ggsave(filename="classification_convergence.png", path="/Users/jwz34/Desktop/STSCI_6520/Project/Plots/lr_1e-4_zeroinit_n1000_p2000")
   
 ```
 
